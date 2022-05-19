@@ -105,3 +105,59 @@ clean:
 	rm -rf tmp
 
 include project.Makefile
+
+# todo how to trigger rules from included makefile?
+
+.PHONY: clean_targ all_sqlite
+
+all_sqlite_plus: clean_targ target/linkml_abuse_generated.yaml target/persons.yaml \
+target/persons_by_schema_from_yaml.db target/persons_by_schema_from_tsv.db target/persons_by_module_from_yaml.db
+
+problematic_sqlite: clean_targ target/persons_by_module_from_yaml.db
+
+clean_targ:
+	rm -rf target/*yaml
+	rm -rf target/*db
+
+target/linkml_abuse_generated.yaml: $(SOURCE_SCHEMA_PATH)
+	# src/linkml/linkml_abuse.yaml
+	$(RUN) gen-yaml  $< > $@
+
+target/persons.yaml: src/data/examples/persons.tsv
+	$(RUN) linkml-convert \
+		--output $@ \
+		--target-class Registry \
+		--index-slot persons \
+		--schema $(SOURCE_SCHEMA_PATH) $<
+
+target/persons_by_module_from_yaml.db: target/persons.yaml
+	# https://linkml.io/linkml/intro/tutorial09.html
+	poetry run linkml-sqldb dump \
+		--module src/linkml-abuse/datamodel/linkml_abuse.py \
+		--db $@ $<
+	# UnboundLocalError: local variable 'sv' referenced before assignment
+	sqlite3 $@ ".tables" ""
+	sqlite3 $@ ".headers on" "select * from Person" ""
+	sqlite3 $@ ".headers on" "select * from Registry" ""
+
+target/persons_by_schema_from_yaml.db: target/persons.yaml
+	# https://linkml.io/linkml/intro/tutorial09.html
+	poetry run linkml-sqldb dump \
+		--schema $(SOURCE_SCHEMA_PATH) \
+		--db $@ $<
+	# WARNING:root:There is no established path to my_datamodel - compile_python may or may not work
+	sqlite3 $@ ".tables" ""
+	# ".mode tabs"
+	sqlite3 $@ ".headers on" "select * from Person" ""
+	sqlite3 $@ ".headers on" "select * from Registry" ""
+
+target/persons_by_schema_from_tsv.db: src/data/examples/persons.tsv
+	# https://linkml.io/linkml/intro/tutorial09.html
+	poetry run linkml-sqldb dump \
+		--schema $(SOURCE_SCHEMA_PATH) \
+		--index-slot persons \
+		--db $@ $<
+	# WARNING:root:There is no established path to my_datamodel - compile_python may or may not work
+	sqlite3 $@ ".tables" ""
+	sqlite3 $@ ".headers on" "select * from Person" ""
+	sqlite3 $@ ".headers on" "select * from Registry" ""
