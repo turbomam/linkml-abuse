@@ -801,7 +801,7 @@
   "source_file": "linkml_abuse.yaml",
   "source_file_date": "2022-05-19T13:44:35",
   "source_file_size": 3771,
-  "generation_date": "2022-05-19T13:45:25",
+  "generation_date": "2022-05-19T13:52:16",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/linkml_abuse.context.jsonld",
