@@ -330,6 +330,13 @@
       "mappings": [
         "http://schema.org/birthDate"
       ],
+      "annotations": [
+        {
+          "tag": "de",
+          "value": "Geburtsdatum",
+          "@type": "Annotation"
+        }
+      ],
       "from_schema": "https://w3id.org/my_org/my_datamodel",
       "slot_uri": "http://schema.org/birthDate",
       "owner": "Person",
@@ -680,6 +687,13 @@
       "mappings": [
         "schema:Person"
       ],
+      "annotations": [
+        {
+          "tag": "es",
+          "value": "persona",
+          "@type": "Annotation"
+        }
+      ],
       "description": "A person (alive, dead, undead, or fictional).",
       "from_schema": "https://w3id.org/my_org/my_datamodel",
       "is_a": "NamedThing",
@@ -799,9 +813,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "linkml_abuse.yaml",
-  "source_file_date": "2022-05-19T13:44:35",
-  "source_file_size": 3771,
-  "generation_date": "2022-05-19T15:04:49",
+  "source_file_date": "2022-05-22T15:25:16",
+  "source_file_size": 3846,
+  "generation_date": "2022-05-23T08:31:40",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/linkml_abuse.context.jsonld",

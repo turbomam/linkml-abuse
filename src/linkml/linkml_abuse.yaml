@@ -65,6 +65,8 @@ classes:
     slot_usage:
       primary_email:
         pattern: "^\\S+@[\\S+\\.]+\\S+"
+    annotations:
+      es: persona
   
   HasAliases:
     description: >-
@@ -128,6 +130,8 @@ slots:
     slot_uri: schema:email
   birth_date:
     slot_uri: schema:birthDate
+    annotations:
+      de: Geburtsdatum
   employed_at:
     range: Organization
   is_current:

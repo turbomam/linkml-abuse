@@ -31,11 +31,11 @@ my_datamodel: a owl:Ontology ;
     dcterms:license "https://creativecommons.org/publicdomain/zero/1.0/" ;
     dcterms:title "My Datamodel" ;
     rdfs:seeAlso "https://example.org/" ;
-    linkml:generation_date "2022-05-19T15:04:51" ;
+    linkml:generation_date "2022-05-23T08:31:42" ;
     linkml:metamodel_version "1.7.0" ;
     linkml:source_file "linkml_abuse.yaml" ;
-    linkml:source_file_date "2022-05-19T13:44:35" ;
-    linkml:source_file_size 3771 .
+    linkml:source_file_date "2022-05-22T15:25:16" ;
+    linkml:source_file_size 3846 .
 
 my_datamodel:employed_at a owl:ObjectProperty,
         linkml:SlotDefinition ;
@@ -54,11 +54,11 @@ my_datamodel:Registry a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Registry" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom my_datamodel:Person ;
-            owl:onProperty my_datamodel:persons ],
-        [ a owl:Restriction ;
             owl:allValuesFrom my_datamodel:Organization ;
-            owl:onProperty my_datamodel:organizations ] .
+            owl:onProperty my_datamodel:organizations ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom my_datamodel:Person ;
+            owl:onProperty my_datamodel:persons ] .
 
 my_datamodel:age_in_years a owl:ObjectProperty,
         linkml:SlotDefinition ;
@@ -187,7 +187,7 @@ my_datamodel:Relationship a owl:Class,
     rdfs:subClassOf [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:String ;
-            owl:onProperty my_datamodel:type ],
+            owl:onProperty my_datamodel:related_to ],
         [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:Date ;
@@ -195,7 +195,7 @@ my_datamodel:Relationship a owl:Class,
         [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:String ;
-            owl:onProperty my_datamodel:related_to ],
+            owl:onProperty my_datamodel:type ],
         [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:Date ;
@@ -218,15 +218,15 @@ my_datamodel:Address a owl:Class,
     rdfs:subClassOf [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:String ;
+            owl:onProperty my_datamodel:street ],
+        [ a owl:Restriction ;
+            owl:maxQualifiedCardinality 1 ;
+            owl:onClass linkml:String ;
             owl:onProperty my_datamodel:postal_code ],
         [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:String ;
-            owl:onProperty my_datamodel:city ],
-        [ a owl:Restriction ;
-            owl:maxQualifiedCardinality 1 ;
-            owl:onClass linkml:String ;
-            owl:onProperty my_datamodel:street ] ;
+            owl:onProperty my_datamodel:city ] ;
     skos:exactMatch schema1:PostalAddress .
 
 my_datamodel:FamilialRelationshipType a owl:Class,
@@ -269,6 +269,9 @@ my_datamodel:Organization a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Organization" ;
     rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty my_datamodel:aliases ],
+        [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:String ;
             owl:onProperty my_datamodel:mission_statement ],
@@ -276,9 +279,6 @@ my_datamodel:Organization a owl:Class,
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:String ;
             owl:onProperty my_datamodel:founding_date ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty my_datamodel:aliases ],
         my_datamodel:HasAliases,
         my_datamodel:NamedThing ;
     skos:exactMatch schema1:Organization .
@@ -288,15 +288,16 @@ my_datamodel:Person a owl:Class,
     rdfs:label "Person" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
+            owl:onClass my_datamodel:Address ;
+            owl:onProperty my_datamodel:current_address ],
+        [ a owl:Restriction ;
+            owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:String ;
             owl:onProperty schema1:email ],
         [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:Integer ;
             owl:onProperty my_datamodel:age_in_years ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty my_datamodel:aliases ],
         [ a owl:Restriction ;
             owl:maxQualifiedCardinality 1 ;
             owl:onClass linkml:String ;
@@ -305,9 +306,8 @@ my_datamodel:Person a owl:Class,
             owl:allValuesFrom my_datamodel:FamilialRelationship ;
             owl:onProperty my_datamodel:has_familial_relationships ],
         [ a owl:Restriction ;
-            owl:maxQualifiedCardinality 1 ;
-            owl:onClass my_datamodel:Address ;
-            owl:onProperty my_datamodel:current_address ],
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty my_datamodel:aliases ],
         my_datamodel:HasAliases,
         my_datamodel:NamedThing ;
     skos:exactMatch schema1:Person .

@@ -41,15 +41,6 @@ def cli(selected_element: str):
 
     meta_view = SchemaView(expanded)
 
-    def element_to_is_dict(view: SchemaView, element):
-        eis = view.class_induced_slots(element)
-        # todo why is replacing whitespace with an underscore necessary? for broad mappings etc
-        #  or use alias instead?
-        eis_names = [i.name.replace(" ", "_") for i in eis]
-        eis_dict = dict(zip(eis_names, eis))
-        eis_names.sort()
-        return eis_dict, eis_names
-
     # todo: how to immediately parse the two items out (from a tuple?)
     sis_dict, sis_names = element_to_is_dict(meta_view, "slot_definition")
     eis_dict, eis_names = element_to_is_dict(meta_view, selected_element)
@@ -71,6 +62,8 @@ def cli(selected_element: str):
                     final = ""
                     # todo might want special handling for examples
                     # somehow the X_definitions have their names cast to strings
+                    # todo: sis_dict doesn't consider the fact
+                    #  that a slot might have different usage in some meta classes?
                     if sis_dict[sn].multivalued and sis_dict[sn].range in [
                         "string",
                         "class_definition",
@@ -135,6 +128,34 @@ def cli(selected_element: str):
     # extensions.yaml
     # mappings.yaml
     # types.yaml
+
+
+def element_to_is_dict(view: SchemaView, element):
+    eis = view.class_induced_slots(element)
+    # todo why is replacing whitespace with an underscore necessary? for broad mappings etc
+    #  or use alias instead?
+    eis_names = [i.name.replace(" ", "_") for i in eis]
+    eis_dict = dict(zip(eis_names, eis))
+    eis_names.sort()
+    return eis_dict, eis_names
+
+
+def flatten_some_lists(possible_list, slot_def):
+    # todo add super flexible typing?
+    flatten_eligible = [
+        "class_definition",
+        "ncname",
+        "slot_definition",
+        "string",
+        "subset_definition",
+        "uri",
+        "uriorcurie",
+    ]
+    if slot_def.multivalued and slot_def.range in flatten_eligible:
+        final = "|".join(possible_list)
+    else:
+        final = possible_list
+    return final
 
 
 if __name__ == "__main__":

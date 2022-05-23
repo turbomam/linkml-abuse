@@ -15,6 +15,7 @@ problematic_sqlite: clean_targ target/persons_by_module_from_yaml.db
 clean_targ:
 	rm -rf target/*yaml
 	rm -rf target/*db
+	rm -rf target/*tsv
 
 target/linkml_abuse_generated.yaml: $(SOURCE_SCHEMA_PATH)
 	# src/linkml/linkml_abuse.yaml
@@ -64,5 +65,29 @@ schemasheets/output/template.tsv:
 	$(RUN) linkml2sheets \
 		--schema $(SOURCE_SCHEMA_PATH) schemasheets/templates/*.tsv -d schemasheets/output/ --overwrite
 
-get_metaclass_slotvals:
+target/schema_definition_slotvals.tsv:
 	$(RUN) python utils/get_metaclass_slotvals.py --selected_element schema_definition
+
+target/annotation_slotvals.tsv:
+	$(RUN) python utils/get_metaclass_slotvals.py --selected_element annotation
+
+target/annotations.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(SOURCE_SCHEMA_PATH) \
+		--meta_element annotation \
+		--tsv_output $@
+
+target/annotations.yaml: target/annotations.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $<
+
+target/enums.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(SOURCE_SCHEMA_PATH) \
+		--meta_element enum_definition \
+		--tsv_output $@
+
+target/enums.yaml: target/enums.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $<
+
