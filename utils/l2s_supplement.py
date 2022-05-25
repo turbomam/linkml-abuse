@@ -179,9 +179,12 @@ def get_types(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
             current_dict["uri"] = v.uri
             schema_type_dicts.append(current_dict)
     df = pd.DataFrame(schema_type_dicts)
-    final_frame = prioritize_columns(df, ["type", "uri"])
-    final_frame = add_gt_row(final_frame)
-    # final_frame = final_frame.replace(dict(), None, regex=False)
+    if len(df.columns) > 0:
+        final_frame = prioritize_columns(df, ["type", "uri"])
+        final_frame = add_gt_row(final_frame)
+        # final_frame = final_frame.replace(dict(), None, regex=False)
+    else:
+        final_frame = pd.DataFrame([{"type": "> type"}])
     final_frame.to_csv(tsv_output, sep="\t", index=False)
 
 

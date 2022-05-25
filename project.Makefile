@@ -192,3 +192,58 @@ target/nmdc_schema_def.yaml: target/nmdc_schema_def.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $<
 
+
+# ---
+
+roundtrip_input = "/home/mark/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml"
+
+target/roundtrip_annotations.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(roundtrip_input) \
+		--meta_element annotation \
+		--tsv_output $@
+
+target/roundtrip_enums.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(roundtrip_input) \
+		--meta_element enum_definition \
+		--tsv_output $@
+
+target/roundtrip_prefixes.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(roundtrip_input) \
+		--meta_element prefix \
+		--tsv_output $@
+
+target/roundtrip_schema_definition.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(roundtrip_input) \
+		--meta_element schema_definition \
+		--tsv_output $@
+
+target/roundtrip_slots.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(roundtrip_input) \
+		--meta_element slot_definition \
+		--tsv_output $@
+
+target/roundtrip_subsets.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(roundtrip_input) \
+		--meta_element subset_definition \
+		--tsv_output $@
+
+target/roundtrip_types.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(roundtrip_input) \
+		--meta_element type_definition \
+		--tsv_output $@
+# target/roundtrip_types.tsv
+# ValueError: list.remove(x): x not in list
+target/roundtrip.yaml: target/roundtrip_annotations.tsv target/roundtrip_enums.tsv target/roundtrip_prefixes.tsv \
+target/roundtrip_schema_definition.tsv target/roundtrip_slots.tsv target/roundtrip_subsets.tsv target/roundtrip_types.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $^
+
+
+
