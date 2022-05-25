@@ -238,12 +238,21 @@ target/roundtrip_types.tsv:
 		--schema_source $(roundtrip_input) \
 		--meta_element type_definition \
 		--tsv_output $@
-# target/roundtrip_types.tsv
-# ValueError: list.remove(x): x not in list
+
+target/roundtrip_classes.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $(roundtrip_input) \
+		--meta_element class_definition \
+		--tsv_output $@
+
 target/roundtrip.yaml: target/roundtrip_annotations.tsv target/roundtrip_enums.tsv target/roundtrip_prefixes.tsv \
-target/roundtrip_schema_definition.tsv target/roundtrip_slots.tsv target/roundtrip_subsets.tsv target/roundtrip_types.tsv
+target/roundtrip_schema_definition.tsv target/roundtrip_slots.tsv target/roundtrip_subsets.tsv \
+target/roundtrip_classes.tsv target/roundtrip_types.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $^
 
-
+target/roundtrip_diff.yaml: target/roundtrip.yaml
+	$(RUN) deep diff \
+		--exclude-regex-paths from_schema \
+		--ignore-order $(roundtrip_input) target/roundtrip.yaml > $@
 

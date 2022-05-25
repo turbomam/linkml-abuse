@@ -17,12 +17,18 @@ click_log.basic_config(logger)
 
 pd.set_option("display.max_columns", None)
 
+# todo deep roundtrip diff
+#  remember there are cowardly skips
+#  And know elements that don't propagate over imports like subsets and prefixes
+
 cowardly_skip = [
     "all_of",
     "alt_descriptions",
     "annotations",
     "any_of",
+    "attributes",
     "classes",
+    "classification_rules",
     "default_curi_maps",
     "enum_range",
     "enums",
@@ -35,9 +41,13 @@ cowardly_skip = [
     "name",
     "none_of",
     "prefixes",
+    "rules",
     "slot_definitions",
+    "slot_usage",
+    "slots",
     "structured_aliases",
     "subsets",
+    "unique_keys",
     "type_uri",
 ]
 
@@ -77,6 +87,40 @@ def cli(schema_source: str, meta_element: str, tsv_output: str):
         get_subsets(schema_view, meta_view, tsv_output)
     elif meta_element == "type_definition":
         get_types(schema_view, meta_view, tsv_output)
+    elif meta_element == "class_definition":
+        get_classes(schema_view, meta_view, tsv_output)
+
+
+def get_classes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+    schema_classes = schema_view.all_classes()
+    cis_dict, cis_names = gms.element_to_is_dict(meta_view, "class_definition")
+    sis_dict, sis_names = gms.element_to_is_dict(meta_view, "slot_definition")
+    cowardly_class_names = [i for i in cis_dict if i not in cowardly_skip]
+    cowardly_slot_names = [i for i in sis_dict if i not in cowardly_skip]
+    class_lod = []
+    usage_lod = []
+    for ck, cv in schema_classes.items():
+        current_class_dict = {"class": ck}
+        for cccn in cowardly_class_names:
+            current_class_dict[cccn] = gms.flatten_some_lists(
+                possible_list=cv[cccn], slot_def=cis_dict[cccn]
+            )
+        class_lod.append(current_class_dict)
+        # or induced_slots?
+        usage = cv.slot_usage
+        for uk, uv in usage.items():
+            current_slot_dict = {"class": ck, "slot": uk}
+            for ccsn in cowardly_slot_names:
+                current_slot_dict[ccsn] = gms.flatten_some_lists(
+                    possible_list=uv[ccsn], slot_def=sis_dict[ccsn]
+                )
+            usage_lod.append(current_slot_dict)
+    class_df = pd.DataFrame(class_lod)
+    slot_df = pd.DataFrame(usage_lod)
+    combo_df = pd.concat([class_df, slot_df])
+    final_frame = prioritize_columns(combo_df, ["class", "slot"])
+    final_frame = add_gt_row(final_frame)
+    final_frame.to_csv(tsv_output, sep="\t", index=False)
 
 
 def get_schema(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
