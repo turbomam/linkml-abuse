@@ -91,3 +91,72 @@ target/enums.yaml: target/enums.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $<
 
+target/nmdc_annotations.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
+		--meta_element annotation \
+		--tsv_output $@
+
+target/nmdc_enums.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
+		--meta_element enum_definition \
+		--tsv_output $@
+
+target/mixs_annotations.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/mixs/model/schema/mixs.yaml" \
+		--meta_element annotation \
+		--tsv_output $@
+
+target/mixs_enums.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/mixs/model/schema/mixs.yaml" \
+		--meta_element enum_definition \
+		--tsv_output $@
+
+
+target/nmdc_types.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
+		--meta_element type_definition \
+		--tsv_output $@
+
+target/nmdc_types.yaml: target/nmdc_types.tsv
+	# WARNING:root:Filling in missing prefix for: xsd => http://www.w3.org/2001/XMLSchema#
+    # WARNING:root:Filling in missing prefix for: qud => http://example.org/qud/
+	$(RUN) sheets2linkml \
+		--output $@ $<
+
+target/nmdc_prefixes.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
+		--meta_element prefix \
+		--tsv_output $@
+
+target/nmdc_prefixes.yaml: target/nmdc_prefixes.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $<
+
+
+target/nmdc_subsets.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
+		--meta_element subset_definition \
+		--tsv_output $@
+
+target/nmdc_subsets.yaml: target/nmdc_subsets.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $<
+
+
+
+target/nmdc_slots.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
+		--meta_element slot_definition \
+		--tsv_output $@
+
+target/nmdc_slots.yaml: target/nmdc_slots.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $<

@@ -9,6 +9,7 @@ import click_log
 
 # todo how to remember the yaml_dumper import
 from linkml_runtime.dumpers import yaml_dumper
+from linkml_runtime.linkml_model import Example
 
 logger = logging.getLogger(__name__)
 click_log.basic_config(logger)
@@ -153,6 +154,11 @@ def flatten_some_lists(possible_list, slot_def):
     ]
     if slot_def.multivalued and slot_def.range in flatten_eligible:
         final = "|".join(possible_list)
+    elif slot_def.multivalued and slot_def.range == "example":
+        temp = []
+        for i in possible_list:
+            temp.append(i.value)
+        final = "|".join(temp)
     else:
         final = possible_list
     return final
@@ -160,3 +166,6 @@ def flatten_some_lists(possible_list, slot_def):
 
 if __name__ == "__main__":
     cli()
+
+# x = Example()
+# x.
