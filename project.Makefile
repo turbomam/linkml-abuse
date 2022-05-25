@@ -5,6 +5,25 @@
 ## unfortunately, the default? Makefile plugin for PyCharm
 ##   can't seem to launch *.makefile (non-Makefile) rules from the GUI
 
+MAKEFLAGS += --warn-undefined-variables
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c
+.DEFAULT_GOAL := help
+.DELETE_ON_ERROR:
+.SUFFIXES:
+.SECONDARY:
+
+RUN = poetry run
+# get values from about.yaml file
+SCHEMA_NAME = $(shell sh ./utils/get-value.sh name)
+SOURCE_SCHEMA_PATH = $(shell sh ./utils/get-value.sh source_schema_path)
+SRC = src
+DEST = project
+PYMODEL = $(SRC)/$(SCHEMA_NAME)/datamodel
+DOCDIR = docs
+
+# ---
+
 .PHONY: clean_targ all_sqlite l2s
 
 all_sqlite_plus: clean_targ target/linkml_abuse_generated.yaml target/persons.yaml \
@@ -160,3 +179,16 @@ target/nmdc_slots.tsv:
 target/nmdc_slots.yaml: target/nmdc_slots.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $<
+
+
+target/nmdc_schema_def.tsv:
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
+		--meta_element schema_definition \
+		--tsv_output $@
+
+
+target/nmdc_schema_def.yaml: target/nmdc_schema_def.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $<
+

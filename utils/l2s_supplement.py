@@ -1,3 +1,5 @@
+import pprint
+
 from linkml_runtime import SchemaView
 import pandas as pd
 
@@ -20,24 +22,24 @@ cowardly_skip = [
     "alt_descriptions",
     "annotations",
     "any_of",
+    "classes",
+    "default_curi_maps",
     "enum_range",
+    "enums",
     "exactly_one_of",
     "extensions",
     "from_schema",
     "implicit_prefix",
+    "imports",
     "local_names",
     "name",
     "none_of",
+    "prefixes",
+    "slot_definitions",
     "structured_aliases",
+    "subsets",
     "type_uri",
 ]
-
-
-# todo
-#  enums/pvs:
-#  alt_descriptions, extensions, local_names, and structured_aliases are dicts
-#  examples	is a list of Examples
-#  see cowardly_skip list above
 
 
 # todo add click help and better docstrings
@@ -65,21 +67,47 @@ def cli(schema_source: str, meta_element: str, tsv_output: str):
         get_annotations(schema_view, meta_view, tsv_output)
     elif meta_element == "enum_definition":
         get_enums(schema_view, meta_view, tsv_output)
-    elif meta_element == "type_definition":
-        get_types(schema_view, meta_view, tsv_output)
     elif meta_element == "prefix":
         get_prefixes(schema_view, meta_view, tsv_output)
-    elif meta_element == "subset_definition":
-        get_subsets(schema_view, meta_view, tsv_output)
+    elif meta_element == "schema_definition":
+        get_schema(schema_view, meta_view, tsv_output)
     elif meta_element == "slot_definition":
         get_slots(schema_view, meta_view, tsv_output)
+    elif meta_element == "subset_definition":
+        get_subsets(schema_view, meta_view, tsv_output)
+    elif meta_element == "type_definition":
+        get_types(schema_view, meta_view, tsv_output)
+
+
+def get_schema(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+    # must omit:
+    # "default_curi_maps" (0..* String)
+    #   ERROR:root:Cannot fetch: https://raw.githubusercontent.com/prefixcommons/biocontext/master/registry/obo_context|idot_context.jsonld
+    # "imports" (SchemaDefinition → 0..* Uriorcurie)
+    #   WARNING:rdflib.term:https://w3id.org/linkml/types|mixs|core|prov|workflow_execution_activity|annotation|external_identifiers does not look like a valid URI, trying to serialize this will break.
+    # "subsets" (SchemaDefinition → 0..* SubsetDefinition)
+    #   TypeError: unsupported operand type(s) for +: 'dict' and 'list'
+    schema_schema = schema_view.schema
+    sis_dict, sis_names = gms.element_to_is_dict(meta_view, "schema_definition")
+    cowardly_names = [i for i in sis_dict if i not in cowardly_skip]
+    current_dict = {"schema": schema_schema.name}
+    for i in cowardly_names:
+        # print(f"{sis_dict[i].multivalued} {sis_dict[i].range} {i}")
+        current_dict[i] = gms.flatten_some_lists(
+            possible_list=schema_schema[i], slot_def=sis_dict[i]
+        )
+    df = pd.DataFrame(current_dict, index=[0])
+    df = prioritize_columns(df, ["schema"])
+    df = add_gt_row(df)
+    df.to_csv(tsv_output, sep="\t", index=False)
 
 
 def get_subsets(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
-    # subsets aren't getting merged
-    # core.yaml: subsets:
-    # nmdc.yaml: subsets:
-    # workflow_execution_activity.yaml: subsets:
+    # todo subsets aren't getting merged
+    #   other files with subsets:
+    #   core.yaml: subsets:
+    #   nmdc.yaml: subsets:
+    #   workflow_execution_activity.yaml: subsets:
 
     schema_view.merge_imports()
     schema_subsets = schema_view.all_subsets(imports=True)
@@ -100,7 +128,7 @@ def get_subsets(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str)
 
 
 def get_prefixes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
-    # are prefixes getting merged from imports?
+    # todo are prefixes getting merged from imports?
     schema_view.merge_imports()
     schema_prefixes = schema_view.schema.prefixes
     lod = []
@@ -115,14 +143,11 @@ def get_prefixes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str
 def get_slots(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
     sis_dict, sis_names = gms.element_to_is_dict(meta_view, "slot_definition")
     cowardly_names = [i for i in sis_names if i not in cowardly_skip]
-    print(cowardly_names)
     schema_slots = schema_view.all_slots()
     schema_slot_dicts = []
     for k, v in schema_slots.items():
-        print(k)
         current_dict = {"slot": k}
         for i in cowardly_names:
-            print(i)
             current_dict[i] = gms.flatten_some_lists(
                 possible_list=v[i], slot_def=sis_dict[i]
             )
@@ -150,7 +175,7 @@ def get_types(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
                 current_dict[i] = gms.flatten_some_lists(
                     possible_list=v[i], slot_def=tis_dict[i]
                 )
-            # why not type_uri?
+            # todo why not type_uri?
             current_dict["uri"] = v.uri
             schema_type_dicts.append(current_dict)
     df = pd.DataFrame(schema_type_dicts)
@@ -238,6 +263,7 @@ def prioritize_columns(df: pd.DataFrame, initial_columns) -> pd.DataFrame:
     all_columns = list(df.columns)
     for i in initial_columns:
         all_columns.remove(i)
+    all_columns.sort()
     final_columns = initial_columns + all_columns
     df = df[final_columns]
     df.sort_values(by=initial_columns, inplace=True)
@@ -245,6 +271,8 @@ def prioritize_columns(df: pd.DataFrame, initial_columns) -> pd.DataFrame:
 
 
 def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+    # todo this creates a standalone table.
+    #  Will schemasheets honor it in combination with other sheets that specify the same terms?
     type_to_col = {"class_definition": "class", "slot_definition": "slot"}
     lod = []
     tag_set = set()
