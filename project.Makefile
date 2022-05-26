@@ -195,7 +195,10 @@ target/nmdc_schema_def.yaml: target/nmdc_schema_def.tsv
 
 # ---
 
-roundtrip_input = "/home/mark/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml"
+# /home/mark/gitrepos/mixs/model/schema/mixs.yaml
+# "/home/mark/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml"
+# /home/mark/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
+roundtrip_input = /home/mark/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
 
 target/roundtrip_annotations.tsv:
 	$(RUN) python utils/l2s_supplement.py \
@@ -245,9 +248,14 @@ target/roundtrip_classes.tsv:
 		--meta_element class_definition \
 		--tsv_output $@
 
+target/roundtrip_classes.yaml: target/roundtrip_classes.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $^
+
+# target/roundtrip_classes.tsv
 target/roundtrip.yaml: target/roundtrip_annotations.tsv target/roundtrip_enums.tsv target/roundtrip_prefixes.tsv \
 target/roundtrip_schema_definition.tsv target/roundtrip_slots.tsv target/roundtrip_subsets.tsv \
-target/roundtrip_classes.tsv target/roundtrip_types.tsv
+target/roundtrip_types.tsv target/roundtrip_classes.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $^
 

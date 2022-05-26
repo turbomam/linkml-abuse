@@ -22,6 +22,7 @@ pd.set_option("display.max_columns", None)
 #  And know elements that don't propagate over imports like subsets and prefixes
 
 cowardly_skip = [
+    "all_members",
     "all_of",
     "alt_descriptions",
     "annotations",
@@ -30,25 +31,37 @@ cowardly_skip = [
     "classes",
     "classification_rules",
     "default_curi_maps",
+    "definition_uri",
+    "domain_of",
     "enum_range",
     "enums",
     "exactly_one_of",
     "extensions",
     "from_schema",
+    "generation_date",
     "implicit_prefix",
+    "imported_from",
     "imports",
+    "is_usage_slot",
     "local_names",
+    "metamodel_version",
     "name",
     "none_of",
+    "owner",
     "prefixes",
+    "range_expression",
     "rules",
     "slot_definitions",
     "slot_usage",
     "slots",
+    "source_file",
+    "source_file_date",
+    "source_file_size",
     "structured_aliases",
     "subsets",
-    "unique_keys",
     "type_uri",
+    "unique_keys",
+    "usage_slot_name",
 ]
 
 
@@ -106,15 +119,25 @@ def get_classes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str)
                 possible_list=cv[cccn], slot_def=cis_dict[cccn]
             )
         class_lod.append(current_class_dict)
+        # ----
+        # usage = cv.slot_usage
+        # for uk, uv in usage.items():
+        #     current_slot_dict = {"class": ck, "slot": uk}
+        #     for ccsn in cowardly_slot_names:
+        #         current_slot_dict[ccsn] = gms.flatten_some_lists(
+        #             possible_list=uv[ccsn], slot_def=sis_dict[ccsn]
+        #         )
+        #     usage_lod.append(current_slot_dict)
         # or induced_slots?
-        usage = cv.slot_usage
-        for uk, uv in usage.items():
-            current_slot_dict = {"class": ck, "slot": uk}
-            for ccsn in cowardly_slot_names:
-                current_slot_dict[ccsn] = gms.flatten_some_lists(
-                    possible_list=uv[ccsn], slot_def=sis_dict[ccsn]
+        usage = schema_view.class_induced_slots(ck)
+        for u in usage:
+            current_slot_dict = {"class": ck, "slot": u.alias}
+            for us in cowardly_slot_names:
+                current_slot_dict[us] = gms.flatten_some_lists(
+                    possible_list=u[us], slot_def=sis_dict[us]
                 )
             usage_lod.append(current_slot_dict)
+
     class_df = pd.DataFrame(class_lod)
     slot_df = pd.DataFrame(usage_lod)
     combo_df = pd.concat([class_df, slot_df])
@@ -166,8 +189,11 @@ def get_subsets(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str)
             )
         lod.append(current_dict)
     df = pd.DataFrame(lod)
-    df = add_gt_row(df)
-    df = prioritize_columns(df, ["subset"])
+    if len(df.columns) > 0:
+        df = prioritize_columns(df, ["subset"])
+        df = add_gt_row(df)
+    else:
+        final_frame = pd.DataFrame([{"subset": "> subset"}])
     df.to_csv(tsv_output, sep="\t", index=False)
 
 
@@ -365,23 +391,25 @@ def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: 
         schema_sheets_lod.append(current_row)
     schema_sheets_df = pd.DataFrame(schema_sheets_lod)
 
-    initial_cols = set(schema_sheets_df.columns)
-    element_cols = set(type_to_col.values())
-    used_element_cols = list(element_cols.intersection(initial_cols))
-    used_element_cols.sort()
-    tag_cols = list(tag_set)
-    tag_cols.sort()
-    r1 = used_element_cols + tag_cols
-    schema_sheets_df = schema_sheets_df[r1]
-    annotations_placeholder = ["annotations"] * len(tag_cols)
-    r2 = used_element_cols + annotations_placeholder
-    r2[0] = f"> {r2[0]}"
-    r3_rhs = [f"inner_key: {i}" for i in tag_cols]
-    r3 = ([""] * len(used_element_cols)) + r3_rhs
-    r3[0] = ">"
-    headers_frame = pd.DataFrame([r2, r3], columns=schema_sheets_df.columns)
-    final_frame = pd.concat([headers_frame, schema_sheets_df])
-
+    if len(schema_sheets_df.columns) > 0:
+        initial_cols = set(schema_sheets_df.columns)
+        element_cols = set(type_to_col.values())
+        used_element_cols = list(element_cols.intersection(initial_cols))
+        used_element_cols.sort()
+        tag_cols = list(tag_set)
+        tag_cols.sort()
+        r1 = used_element_cols + tag_cols
+        schema_sheets_df = schema_sheets_df[r1]
+        annotations_placeholder = ["annotations"] * len(tag_cols)
+        r2 = used_element_cols + annotations_placeholder
+        r2[0] = f"> {r2[0]}"
+        r3_rhs = [f"inner_key: {i}" for i in tag_cols]
+        r3 = ([""] * len(used_element_cols)) + r3_rhs
+        r3[0] = ">"
+        headers_frame = pd.DataFrame([r2, r3], columns=schema_sheets_df.columns)
+        final_frame = pd.concat([headers_frame, schema_sheets_df])
+    else:
+        final_frame = pd.DataFrame([{"annotations": "> annotations"}])
     final_frame.to_csv(tsv_output, sep="\t", index=False)
 
 
