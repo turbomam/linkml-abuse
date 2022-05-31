@@ -244,18 +244,26 @@ target/nmdc_schema_def.yaml: target/nmdc_schema_def.tsv
 #wastewater/sludge	40
 #water	85
 
-# /home/mark/gitrepos/mixs/model/schema/mixs.yaml
-# "/home/mark/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml"
-# /home/mark/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
-# /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
 # /Users/MAM/Documents/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
-roundtrip_input = /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
+# /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
+# /Users/MAM/Documents/gitrepos/nmdc-schema/src/schema/nmdc.yaml
+# /Users/MAM/Documents/gitrepos/nmdc-schema/src/schema/nmdc.yaml
+# /Users/MAM/Documents/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml
+# /home/mark/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
+# /home/mark/gitrepos/mixs/model/schema/mixs.yaml
+# /home/mark/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml
+roundtrip_input = /Users/MAM/Documents/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
 
 target/roundtrip_annotations.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
 		--meta_elements annotation \
 		--tsv_output $@
+
+target/roundtrip_annotations.yaml: target/roundtrip_annotations.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $^
+
 
 target/roundtrip_enums.tsv:
 	$(RUN) python utils/l2s_supplement.py \
@@ -293,6 +301,10 @@ target/roundtrip_types.tsv:
 		--meta_elements type_definition \
 		--tsv_output $@
 
+target/roundtrip_types.yaml: target/roundtrip_types.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $^
+
 target/roundtrip_classes.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
@@ -303,17 +315,25 @@ target/roundtrip_classes.yaml: target/roundtrip_classes.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $^
 
-# target/roundtrip_classes.tsv
 target/roundtrip.yaml: target/roundtrip_annotations.tsv target/roundtrip_enums.tsv target/roundtrip_prefixes.tsv \
-target/roundtrip_schema_definition.tsv target/roundtrip_slots.tsv target/roundtrip_subsets.tsv \
-target/roundtrip_types.tsv target/roundtrip_classes.tsv
+target/roundtrip_schema_definition.tsv target/roundtrip_slots.tsv target/roundtrip_subsets.tsv target/roundtrip_classes.tsv \
+target/roundtrip_types.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $^
 
-target/roundtrip_diff.yaml: target/roundtrip.yaml
+
+target/generated.yaml: $(roundtrip_input)
+	$(RUN) gen-linkml \
+		--output $@ \
+		--no-materialize-attributes \
+		--format yaml \
+		--useuris $<
+
+# this isn't meaningful if the source schem has imports
+target/roundtrip_diff.yaml: target/generated.yaml target/roundtrip.yaml
 	$(RUN) deep diff \
 		--exclude-regex-paths from_schema \
-		--ignore-order $(roundtrip_input) target/roundtrip.yaml > $@
+		--ignore-order $^ > $@
 
 target/mixs6_core.tsv:
 	curl -L -s 'https://docs.google.com/spreadsheets/d/1QDeeUcDqXes69Y2RjU2aWgOpCVWo5OVsBX9MKmMqi_o/export?format=tsv&gid=178015749' > $@

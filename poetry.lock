@@ -112,7 +112,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "cachetools"
-version = "5.1.0"
+version = "5.2.0"
 description = "Extensible memoizing collections and decorators"
 category = "main"
 optional = false
@@ -273,7 +273,7 @@ beautifulsoup4 = "*"
 
 [[package]]
 name = "google-api-core"
-version = "2.8.0"
+version = "2.8.1"
 description = "Google API client core library"
 category = "main"
 optional = false
@@ -281,18 +281,18 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 google-auth = ">=1.25.0,<3.0dev"
-googleapis-common-protos = ">=1.52.0,<2.0dev"
-protobuf = ">=3.12.0"
+googleapis-common-protos = ">=1.56.2,<2.0dev"
+protobuf = ">=3.15.0,<4.0.0dev"
 requests = ">=2.18.0,<3.0.0dev"
 
 [package.extras]
 grpc = ["grpcio (>=1.33.2,<2.0dev)", "grpcio-status (>=1.33.2,<2.0dev)"]
-grpcgcp = ["grpcio-gcp (>=0.2.2)"]
-grpcio-gcp = ["grpcio-gcp (>=0.2.2)"]
+grpcgcp = ["grpcio-gcp (>=0.2.2,<1.0dev)"]
+grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0dev)"]
 
 [[package]]
 name = "google-api-python-client"
-version = "2.48.0"
+version = "2.49.0"
 description = "Google API Client Library for Python"
 category = "main"
 optional = false
@@ -354,17 +354,17 @@ tool = ["click (>=6.0.0)"]
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.56.1"
+version = "1.56.2"
 description = "Common protobufs used in Google APIs"
 category = "main"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
-protobuf = ">=3.15.0"
+protobuf = ">=3.15.0,<4.0.0dev"
 
 [package.extras]
-grpc = ["grpcio (>=1.0.0)"]
+grpc = ["grpcio (>=1.0.0,<2.0.0dev)"]
 
 [[package]]
 name = "graphviz"
@@ -573,27 +573,26 @@ format_nongpl = ["fqdn", "idna", "isoduration", "jsonpointer (>1.13)", "rfc3339-
 
 [[package]]
 name = "linkml"
-version = "1.2.11"
+version = "1.2.12"
 description = "Linked Open Data Modeling Language"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.7.6,<4.0.0"
 
 [package.dependencies]
-antlr4-python3-runtime = ">=4.9,<4.10"
+antlr4-python3-runtime = ">=4.9.0,<4.10"
 argparse = ">=1.4.0"
 click = ">=7.0"
 graphviz = ">=0.10.1"
 hbreader = "*"
 isodate = ">=0.6.0"
 jinja2 = "*"
-jsonasobj2 = ">=1.0.3,<2.0"
+jsonasobj2 = ">=1.0.3,<2.0.0"
 jsonschema = ">=3.0.1"
 linkml-dataops = "*"
-linkml-runtime = ">=1.2.12,<1.3.0"
+linkml-runtime = ">=1.2.14,<2.0.0"
 myst-parser = "*"
 openpyxl = "*"
-pandas = "*"
 parse = "*"
 prefixcommons = ">=0.1.7"
 pydantic = "*"
@@ -604,11 +603,12 @@ python-dateutil = "*"
 pyyaml = "*"
 rdflib = ">=6.0.0"
 requests = ">=2.22"
-sphinx = "*"
 sphinx-click = "*"
-sphinx-rtd-theme = "*"
 sqlalchemy = ">=1.4.31"
 watchdog = ">=0.9.0"
+
+[package.extras]
+docs = ["sphinx-rtd-theme", "sphinx"]
 
 [[package]]
 name = "linkml-dataops"
@@ -627,7 +627,7 @@ linkml-runtime = ">=1.1.6"
 
 [[package]]
 name = "linkml-runtime"
-version = "1.2.14"
+version = "1.2.15"
 description = "Runtime environment for LinkML, the Linked open data modeling language"
 category = "main"
 optional = false
@@ -745,7 +745,7 @@ i18n = ["babel (>=2.9.0)"]
 
 [[package]]
 name = "mkdocs-material"
-version = "8.2.15"
+version = "8.2.16"
 description = "Documentation that simply works"
 category = "dev"
 optional = false
@@ -1359,7 +1359,7 @@ test = ["pytest", "pytest-cov", "html5lib", "cython", "typed-ast"]
 
 [[package]]
 name = "sphinx-click"
-version = "4.0.3"
+version = "4.1.0"
 description = "Sphinx extension that automatically documents click applications"
 category = "main"
 optional = false
@@ -1369,21 +1369,6 @@ python-versions = ">=3.7"
 click = ">=7.0"
 docutils = "*"
 sphinx = ">=2.0"
-
-[[package]]
-name = "sphinx-rtd-theme"
-version = "1.0.0"
-description = "Read the Docs theme for Sphinx"
-category = "main"
-optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
-
-[package.dependencies]
-docutils = "<0.18"
-sphinx = ">=1.6"
-
-[package.extras]
-dev = ["transifex-client", "sphinxcontrib-httpdomain", "bump2version"]
 
 [[package]]
 name = "sphinxcontrib-applehelp"
@@ -1595,7 +1580,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "b21d64b763729a26df041e60b99474c0fd7232c2ce01d9e7ba1a182eca1794ab"
+content-hash = "55d66773e002c1777979933e3c21f6a5a31b92b7634f17b70e2bc34f4a4ded81"
 
 [metadata.files]
 alabaster = [
@@ -1651,8 +1636,8 @@ black = [
     {file = "black-22.3.0.tar.gz", hash = "sha256:35020b8886c022ced9282b51b5a875b6d1ab0c387b31a065b84db7c33085ca79"},
 ]
 cachetools = [
-    {file = "cachetools-5.1.0-py3-none-any.whl", hash = "sha256:4ebbd38701cdfd3603d1f751d851ed248ab4570929f2d8a7ce69e30c420b141c"},
-    {file = "cachetools-5.1.0.tar.gz", hash = "sha256:8b3b8fa53f564762e5b221e9896798951e7f915513abf2ba072ce0f07f3f5a98"},
+    {file = "cachetools-5.2.0-py3-none-any.whl", hash = "sha256:f9f17d2aec496a9aa6b76f53e3b614c965223c061982d434d160f930c698a9db"},
+    {file = "cachetools-5.2.0.tar.gz", hash = "sha256:6a94c6402995a99c3970cc7e4884bb60b4a8639938157eeed436098bf9831757"},
 ]
 certifi = [
     {file = "certifi-2022.5.18.1-py3-none-any.whl", hash = "sha256:f1d53542ee8cbedbe2118b5686372fb33c297fcd6379b050cca0ef13a597382a"},
@@ -1713,12 +1698,12 @@ google = [
     {file = "google-3.0.0.tar.gz", hash = "sha256:143530122ee5130509ad5e989f0512f7cb218b2d4eddbafbad40fd10e8d8ccbe"},
 ]
 google-api-core = [
-    {file = "google-api-core-2.8.0.tar.gz", hash = "sha256:065bb8e11c605fd232707ae50963dc1c8af5b3c95b4568887515985e6c1156b3"},
-    {file = "google_api_core-2.8.0-py3-none-any.whl", hash = "sha256:1b9f59236ce1bae9a687c1d4f22957e79a2669e53d032893f6bf0fca54f6931d"},
+    {file = "google-api-core-2.8.1.tar.gz", hash = "sha256:958024c6aa3460b08f35741231076a4dd9a4c819a6a39d44da9627febe8b28f0"},
+    {file = "google_api_core-2.8.1-py3-none-any.whl", hash = "sha256:ce1daa49644b50398093d2a9ad886501aa845e2602af70c3001b9f402a9d7359"},
 ]
 google-api-python-client = [
-    {file = "google-api-python-client-2.48.0.tar.gz", hash = "sha256:600c43d7eac6e3536fdcad1d14ba9ee503edf4c7db0bd827e791bbf03b9f1330"},
-    {file = "google_api_python_client-2.48.0-py2.py3-none-any.whl", hash = "sha256:4527f7b8518a795624ab68da412d55628f83b98c67dd6a5d6edf725454f8b30b"},
+    {file = "google-api-python-client-2.49.0.tar.gz", hash = "sha256:629bbde991ce2d9697c6da37f2416f7aeb01ba01505b166066a415b3c3ce1dfc"},
+    {file = "google_api_python_client-2.49.0-py2.py3-none-any.whl", hash = "sha256:7e172b06abeff7170108596446f0c8e56a129a40ef29a802270a02c0b07e993d"},
 ]
 google-auth = [
     {file = "google-auth-2.6.6.tar.gz", hash = "sha256:1ba4938e032b73deb51e59c4656a00e0939cf0b1112575099f136babb4563312"},
@@ -1733,8 +1718,8 @@ google-auth-oauthlib = [
     {file = "google_auth_oauthlib-0.5.1-py2.py3-none-any.whl", hash = "sha256:24f67735513c4c7134dbde2f1dee5a1deb6acc8dfcb577d7bff30d213a28e7b0"},
 ]
 googleapis-common-protos = [
-    {file = "googleapis-common-protos-1.56.1.tar.gz", hash = "sha256:6b5ee59dc646eb61a8eb65ee1db186d3df6687c8804830024f32573298bca19b"},
-    {file = "googleapis_common_protos-1.56.1-py2.py3-none-any.whl", hash = "sha256:ddcd955b5bb6589368f659fa475373faa1ed7d09cde5ba25e88513d87007e174"},
+    {file = "googleapis-common-protos-1.56.2.tar.gz", hash = "sha256:b09b56f5463070c2153753ef123f07d2e49235e89148e9b2459ec8ed2f68d7d3"},
+    {file = "googleapis_common_protos-1.56.2-py2.py3-none-any.whl", hash = "sha256:023eaea9d8c1cceccd9587c6af6c20f33eeeb05d4148670f2b0322dc1511700c"},
 ]
 graphviz = [
     {file = "graphviz-0.20-py3-none-any.whl", hash = "sha256:62c5f48bcc534a45b4588c548ff75e419c1f1f3a33d31a91796ae80a7f581e4a"},
@@ -1752,6 +1737,7 @@ greenlet = [
     {file = "greenlet-1.1.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:97e5306482182170ade15c4b0d8386ded995a07d7cc2ca8f27958d34d6736497"},
     {file = "greenlet-1.1.2-cp310-cp310-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:e6a36bb9474218c7a5b27ae476035497a6990e21d04c279884eb10d9b290f1b1"},
     {file = "greenlet-1.1.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:abb7a75ed8b968f3061327c433a0fbd17b729947b400747c334a9c29a9af6c58"},
+    {file = "greenlet-1.1.2-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:b336501a05e13b616ef81ce329c0e09ac5ed8c732d9ba7e3e983fcc1a9e86965"},
     {file = "greenlet-1.1.2-cp310-cp310-win_amd64.whl", hash = "sha256:14d4f3cd4e8b524ae9b8aa567858beed70c392fdec26dbdb0a8a418392e71708"},
     {file = "greenlet-1.1.2-cp35-cp35m-macosx_10_14_x86_64.whl", hash = "sha256:17ff94e7a83aa8671a25bf5b59326ec26da379ace2ebc4411d690d80a7fbcf23"},
     {file = "greenlet-1.1.2-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:9f3cba480d3deb69f6ee2c1825060177a22c7826431458c697df88e6aeb3caee"},
@@ -1764,6 +1750,7 @@ greenlet = [
     {file = "greenlet-1.1.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f9d29ca8a77117315101425ec7ec2a47a22ccf59f5593378fc4077ac5b754fce"},
     {file = "greenlet-1.1.2-cp36-cp36m-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:21915eb821a6b3d9d8eefdaf57d6c345b970ad722f856cd71739493ce003ad08"},
     {file = "greenlet-1.1.2-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:eff9d20417ff9dcb0d25e2defc2574d10b491bf2e693b4e491914738b7908168"},
+    {file = "greenlet-1.1.2-cp36-cp36m-musllinux_1_1_x86_64.whl", hash = "sha256:b8c008de9d0daba7b6666aa5bbfdc23dcd78cafc33997c9b7741ff6353bafb7f"},
     {file = "greenlet-1.1.2-cp36-cp36m-win32.whl", hash = "sha256:32ca72bbc673adbcfecb935bb3fb1b74e663d10a4b241aaa2f5a75fe1d1f90aa"},
     {file = "greenlet-1.1.2-cp36-cp36m-win_amd64.whl", hash = "sha256:f0214eb2a23b85528310dad848ad2ac58e735612929c8072f6093f3585fd342d"},
     {file = "greenlet-1.1.2-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:b92e29e58bef6d9cfd340c72b04d74c4b4e9f70c9fa7c78b674d1fec18896dc4"},
@@ -1772,6 +1759,7 @@ greenlet = [
     {file = "greenlet-1.1.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1e12bdc622676ce47ae9abbf455c189e442afdde8818d9da983085df6312e7a1"},
     {file = "greenlet-1.1.2-cp37-cp37m-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:8c790abda465726cfb8bb08bd4ca9a5d0a7bd77c7ac1ca1b839ad823b948ea28"},
     {file = "greenlet-1.1.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f276df9830dba7a333544bd41070e8175762a7ac20350786b322b714b0e654f5"},
+    {file = "greenlet-1.1.2-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:8c5d5b35f789a030ebb95bff352f1d27a93d81069f2adb3182d99882e095cefe"},
     {file = "greenlet-1.1.2-cp37-cp37m-win32.whl", hash = "sha256:64e6175c2e53195278d7388c454e0b30997573f3f4bd63697f88d855f7a6a1fc"},
     {file = "greenlet-1.1.2-cp37-cp37m-win_amd64.whl", hash = "sha256:b11548073a2213d950c3f671aa88e6f83cda6e2fb97a8b6317b1b5b33d850e06"},
     {file = "greenlet-1.1.2-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:9633b3034d3d901f0a46b7939f8c4d64427dfba6bbc5a36b1a67364cf148a1b0"},
@@ -1780,6 +1768,7 @@ greenlet = [
     {file = "greenlet-1.1.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e859fcb4cbe93504ea18008d1df98dee4f7766db66c435e4882ab35cf70cac43"},
     {file = "greenlet-1.1.2-cp38-cp38-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:00e44c8afdbe5467e4f7b5851be223be68adb4272f44696ee71fe46b7036a711"},
     {file = "greenlet-1.1.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ec8c433b3ab0419100bd45b47c9c8551248a5aee30ca5e9d399a0b57ac04651b"},
+    {file = "greenlet-1.1.2-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:2bde6792f313f4e918caabc46532aa64aa27a0db05d75b20edfc5c6f46479de2"},
     {file = "greenlet-1.1.2-cp38-cp38-win32.whl", hash = "sha256:288c6a76705dc54fba69fbcb59904ae4ad768b4c768839b8ca5fdadec6dd8cfd"},
     {file = "greenlet-1.1.2-cp38-cp38-win_amd64.whl", hash = "sha256:8d2f1fb53a421b410751887eb4ff21386d119ef9cde3797bf5e7ed49fb51a3b3"},
     {file = "greenlet-1.1.2-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:166eac03e48784a6a6e0e5f041cfebb1ab400b394db188c48b3a84737f505b67"},
@@ -1788,6 +1777,7 @@ greenlet = [
     {file = "greenlet-1.1.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b1692f7d6bc45e3200844be0dba153612103db241691088626a33ff1f24a0d88"},
     {file = "greenlet-1.1.2-cp39-cp39-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:7227b47e73dedaa513cdebb98469705ef0d66eb5a1250144468e9c3097d6b59b"},
     {file = "greenlet-1.1.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7ff61ff178250f9bb3cd89752df0f1dd0e27316a8bd1465351652b1b4a4cdfd3"},
+    {file = "greenlet-1.1.2-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:0051c6f1f27cb756ffc0ffbac7d2cd48cb0362ac1736871399a739b2885134d3"},
     {file = "greenlet-1.1.2-cp39-cp39-win32.whl", hash = "sha256:f70a9e237bb792c7cc7e44c531fd48f5897961701cdaa06cf22fc14965c496cf"},
     {file = "greenlet-1.1.2-cp39-cp39-win_amd64.whl", hash = "sha256:013d61294b6cd8fe3242932c1c5e36e5d1db2c8afb58606c5a67efce62c1f5fd"},
     {file = "greenlet-1.1.2.tar.gz", hash = "sha256:e30f5ea4ae2346e62cedde8794a56858a67b878dd79f7df76a0767e356b1744a"},
@@ -1858,16 +1848,16 @@ jsonschema = [
     {file = "jsonschema-4.5.1.tar.gz", hash = "sha256:7c6d882619340c3347a1bf7315e147e6d3dae439033ae6383d6acb908c101dfc"},
 ]
 linkml = [
-    {file = "linkml-1.2.11-py3-none-any.whl", hash = "sha256:86ebe4cc818c55e8e5e2b7c3588dd42c2028e23bc55378faa98d42d411abc35d"},
-    {file = "linkml-1.2.11.tar.gz", hash = "sha256:36e24cbba7ed360da3668e0625751b2a767a3f1d05eb1235f1902816e6aa57dd"},
+    {file = "linkml-1.2.12-py3-none-any.whl", hash = "sha256:de67c9f4e962af96362cce1234739c3c828e54c77633f5b1c74089452d7c8b2d"},
+    {file = "linkml-1.2.12.tar.gz", hash = "sha256:aace378f8f4372ac890484ddeabc3ebb35df4852ae895028b5b729750ea1a38c"},
 ]
 linkml-dataops = [
     {file = "linkml_dataops-0.1.0-py3-none-any.whl", hash = "sha256:193cf7f659e5f07946d2c2761896910d5f7151d91282543b1363801f68307f4c"},
     {file = "linkml_dataops-0.1.0.tar.gz", hash = "sha256:4550eab65e78b70dc3b9c651724a94ac2b1d1edb2fbe576465f1d6951a54ed04"},
 ]
 linkml-runtime = [
-    {file = "linkml_runtime-1.2.14-py3-none-any.whl", hash = "sha256:fff32adf21461f333f0aae3d5f4584032d3511671813868bc23851fe01ace1a2"},
-    {file = "linkml_runtime-1.2.14.tar.gz", hash = "sha256:5cd2c92818cc9b45f89c107a665d88c7330a8b860f564e71ddc6ac7a54a02f05"},
+    {file = "linkml-runtime-1.2.15.tar.gz", hash = "sha256:09ae3d03c3200fc9a75598dbeb2beecf5e09f23fbcf6d961be4f93b11616dc0f"},
+    {file = "linkml_runtime-1.2.15-py3-none-any.whl", hash = "sha256:37905faa9299ed70c5cbd52ac4c25c08879b547cb65fabd2bfe9d5d4d3b25840"},
 ]
 markdown = [
     {file = "Markdown-3.3.7-py3-none-any.whl", hash = "sha256:f5da449a6e1c989a4cea2631aa8ee67caa5a2ef855d551c88f9e309f4634c621"},
@@ -1936,8 +1926,8 @@ mkdocs = [
     {file = "mkdocs-1.3.0.tar.gz", hash = "sha256:b504405b04da38795fec9b2e5e28f6aa3a73bb0960cb6d5d27ead28952bd35ea"},
 ]
 mkdocs-material = [
-    {file = "mkdocs-material-8.2.15.tar.gz", hash = "sha256:93b57e53733051431cc83216446e774bdf08bf516a6251ff2f24974f45f98149"},
-    {file = "mkdocs_material-8.2.15-py2.py3-none-any.whl", hash = "sha256:9d6c4ca1ceecc00b2e38c214665ed7605d275321dcaa22f38b9d1175edc58955"},
+    {file = "mkdocs-material-8.2.16.tar.gz", hash = "sha256:7e0a8d0adf0e3425e707e119b041820b5cd3a015225c9c6031ed086e74fe4275"},
+    {file = "mkdocs_material-8.2.16-py2.py3-none-any.whl", hash = "sha256:40557b12950d3212cb0d044f57fe47787f698daea540d01b2e3856237705fa34"},
 ]
 mkdocs-material-extensions = [
     {file = "mkdocs-material-extensions-1.0.3.tar.gz", hash = "sha256:bfd24dfdef7b41c312ede42648f9eb83476ea168ec163b613f9abd12bbfddba2"},
@@ -2262,6 +2252,10 @@ rsa = [
     {file = "ruamel.yaml-0.17.21.tar.gz", hash = "sha256:8b7ce697a2f212752a35c1ac414471dc16c424c9573be4926b56ff3f5d23b7af"},
 ]
 "ruamel.yaml.clib" = [
+    {file = "ruamel.yaml.clib-0.2.6-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:6e7be2c5bcb297f5b82fee9c665eb2eb7001d1050deaba8471842979293a80b0"},
+    {file = "ruamel.yaml.clib-0.2.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:221eca6f35076c6ae472a531afa1c223b9c29377e62936f61bc8e6e8bdc5f9e7"},
+    {file = "ruamel.yaml.clib-0.2.6-cp310-cp310-win32.whl", hash = "sha256:1070ba9dd7f9370d0513d649420c3b362ac2d687fe78c6e888f5b12bf8bc7bee"},
+    {file = "ruamel.yaml.clib-0.2.6-cp310-cp310-win_amd64.whl", hash = "sha256:77df077d32921ad46f34816a9a16e6356d8100374579bc35e15bab5d4e9377de"},
     {file = "ruamel.yaml.clib-0.2.6-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:cfdb9389d888c5b74af297e51ce357b800dd844898af9d4a547ffc143fa56751"},
     {file = "ruamel.yaml.clib-0.2.6-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:7b2927e92feb51d830f531de4ccb11b320255ee95e791022555971c466af4527"},
     {file = "ruamel.yaml.clib-0.2.6-cp35-cp35m-win32.whl", hash = "sha256:ada3f400d9923a190ea8b59c8f60680c4ef8a4b0dfae134d2f2ff68429adfab5"},
@@ -2317,12 +2311,8 @@ sphinx = [
     {file = "Sphinx-4.5.0.tar.gz", hash = "sha256:7bf8ca9637a4ee15af412d1a1d9689fec70523a68ca9bb9127c2f3eeb344e2e6"},
 ]
 sphinx-click = [
-    {file = "sphinx-click-4.0.3.tar.gz", hash = "sha256:a1aacf00cfe11550a2211014617c426a94af8638f1ce735b5d9998cccf1a1edb"},
-    {file = "sphinx_click-4.0.3-py3-none-any.whl", hash = "sha256:4c4b43386ff6304e47ae0467da9c980786eb3c1317cd6f488524c18931627c04"},
-]
-sphinx-rtd-theme = [
-    {file = "sphinx_rtd_theme-1.0.0-py2.py3-none-any.whl", hash = "sha256:4d35a56f4508cfee4c4fb604373ede6feae2a306731d533f409ef5c3496fdbd8"},
-    {file = "sphinx_rtd_theme-1.0.0.tar.gz", hash = "sha256:eec6d497e4c2195fa0e8b2016b337532b8a699a68bcb22a512870e16925c6a5c"},
+    {file = "sphinx-click-4.1.0.tar.gz", hash = "sha256:fedebd39991243ec5cfa1c9e483db7ea2621b3df2012315c89c6f1f3722f192b"},
+    {file = "sphinx_click-4.1.0-py3-none-any.whl", hash = "sha256:60d6507bf623e20e9cbab732d19fc4890cc36a394c82ba8e2320f9f9fdc4571e"},
 ]
 sphinxcontrib-applehelp = [
     {file = "sphinxcontrib-applehelp-1.0.2.tar.gz", hash = "sha256:a072735ec80e7675e3f432fcae8610ecf509c5f1869d17e2eecff44389cdbc58"},

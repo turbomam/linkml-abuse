@@ -441,11 +441,11 @@ def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: 
                 }
             else:
                 dod[i["element"]] = {
-                    i["element_type"]: i["element"],
+                    type_to_col[i["element_type"]]: i["element"],
                     i["tag"]: i["value"],
                 }
 
-    schema_sheets_df = pd.DataFrame((dod.values()))
+    schema_sheets_df = pd.DataFrame(dod.values())
 
     # schema_sheets_lod = []
     # for i in lod:
