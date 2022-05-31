@@ -93,7 +93,7 @@ target/annotation_slotvals.tsv:
 target/annotations.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(SOURCE_SCHEMA_PATH) \
-		--meta_element annotation \
+		--meta_elements annotation \
 		--tsv_output $@
 
 target/annotations.yaml: target/annotations.tsv
@@ -103,7 +103,7 @@ target/annotations.yaml: target/annotations.tsv
 target/enums.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(SOURCE_SCHEMA_PATH) \
-		--meta_element enum_definition \
+		--meta_elements enum_definition \
 		--tsv_output $@
 
 target/enums.yaml: target/enums.tsv
@@ -113,32 +113,32 @@ target/enums.yaml: target/enums.tsv
 target/nmdc_annotations.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
-		--meta_element annotation \
+		--meta_elements annotation \
 		--tsv_output $@
 
 target/nmdc_enums.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
-		--meta_element enum_definition \
+		--meta_elements enum_definition \
 		--tsv_output $@
 
 target/mixs_annotations.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/mixs/model/schema/mixs.yaml" \
-		--meta_element annotation \
+		--meta_elements annotation \
 		--tsv_output $@
 
 target/mixs_enums.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/mixs/model/schema/mixs.yaml" \
-		--meta_element enum_definition \
+		--meta_elements enum_definition \
 		--tsv_output $@
 
 
 target/nmdc_types.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
-		--meta_element type_definition \
+		--meta_elements type_definition \
 		--tsv_output $@
 
 target/nmdc_types.yaml: target/nmdc_types.tsv
@@ -150,7 +150,7 @@ target/nmdc_types.yaml: target/nmdc_types.tsv
 target/nmdc_prefixes.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
-		--meta_element prefix \
+		--meta_elements prefix \
 		--tsv_output $@
 
 target/nmdc_prefixes.yaml: target/nmdc_prefixes.tsv
@@ -161,7 +161,7 @@ target/nmdc_prefixes.yaml: target/nmdc_prefixes.tsv
 target/nmdc_subsets.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
-		--meta_element subset_definition \
+		--meta_elements subset_definition \
 		--tsv_output $@
 
 target/nmdc_subsets.yaml: target/nmdc_subsets.tsv
@@ -173,7 +173,7 @@ target/nmdc_subsets.yaml: target/nmdc_subsets.tsv
 target/nmdc_slots.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
-		--meta_element slot_definition \
+		--meta_elements slot_definition \
 		--tsv_output $@
 
 target/nmdc_slots.yaml: target/nmdc_slots.tsv
@@ -184,7 +184,7 @@ target/nmdc_slots.yaml: target/nmdc_slots.tsv
 target/nmdc_schema_def.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source "/home/mark/gitrepos/nmdc-schema/src/schema/nmdc.yaml" \
-		--meta_element schema_definition \
+		--meta_elements schema_definition \
 		--tsv_output $@
 
 
@@ -195,57 +195,108 @@ target/nmdc_schema_def.yaml: target/nmdc_schema_def.tsv
 
 # ---
 
+# CORE
+
+# Section (mixs_source appended "_field")
+# environment	10
+# investigation	6
+# nucleic acid sequence source	25
+# sequencing	57
+
+# Occurence
+# 1	93
+# m	5
+
+# https://linkml.io/schemasheets/datamodel/Cardinality/
+# (cardinality)
+# -	469 not_applicable
+# C	227 conditional_mandatory
+# E	44 conditional
+# M	157 mandatory
+# X	181 optional
+
+# PACKAGES
+# with possible duplicate rows
+# remove "Environmental package" col: 710 duplicates, 1047 "uniques", but ...
+
+
+#agriculture	161
+#air	29
+#built environment	162
+#food-animal and animal feed	105
+#food-farm environment	144
+#food-food production facility	104
+#food-human foods	112
+#host-associated	50
+#human-associated	53
+#human-gut	37
+#human-oral	36
+#human-skin	37
+#human-vaginal	45
+#hydrocarbon resources-cores	82
+#hydrocarbon resources-fluids/swabs	86
+#microbial mat/biofilm	64
+#miscellaneous natural or artificial environment	46
+#plant-associated	76
+#sediment	70
+#soil	58
+#symbiont-associated	72
+#wastewater/sludge	40
+#water	85
+
 # /home/mark/gitrepos/mixs/model/schema/mixs.yaml
 # "/home/mark/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml"
 # /home/mark/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
-roundtrip_input = /home/mark/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
+# /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
+# /Users/MAM/Documents/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
+roundtrip_input = /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
 
 target/roundtrip_annotations.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
-		--meta_element annotation \
+		--meta_elements annotation \
 		--tsv_output $@
 
 target/roundtrip_enums.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
-		--meta_element enum_definition \
+		--meta_elements enum_definition \
 		--tsv_output $@
 
 target/roundtrip_prefixes.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
-		--meta_element prefix \
+		--meta_elements prefix \
 		--tsv_output $@
 
 target/roundtrip_schema_definition.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
-		--meta_element schema_definition \
+		--meta_elements schema_definition \
 		--tsv_output $@
 
 target/roundtrip_slots.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
-		--meta_element slot_definition \
+		--meta_elements slot_definition \
 		--tsv_output $@
 
 target/roundtrip_subsets.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
-		--meta_element subset_definition \
+		--meta_elements subset_definition \
 		--tsv_output $@
 
 target/roundtrip_types.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
-		--meta_element type_definition \
+		--meta_elements type_definition \
 		--tsv_output $@
 
 target/roundtrip_classes.tsv:
 	$(RUN) python utils/l2s_supplement.py \
 		--schema_source $(roundtrip_input) \
-		--meta_element class_definition \
+		--meta_elements class_definition \
 		--tsv_output $@
 
 target/roundtrip_classes.yaml: target/roundtrip_classes.tsv
@@ -263,4 +314,42 @@ target/roundtrip_diff.yaml: target/roundtrip.yaml
 	$(RUN) deep diff \
 		--exclude-regex-paths from_schema \
 		--ignore-order $(roundtrip_input) target/roundtrip.yaml > $@
+
+target/mixs6_core.tsv:
+	curl -L -s 'https://docs.google.com/spreadsheets/d/1QDeeUcDqXes69Y2RjU2aWgOpCVWo5OVsBX9MKmMqi_o/export?format=tsv&gid=178015749' > $@
+
+target/mixs6.tsv:
+	curl -L -s 'https://docs.google.com/spreadsheets/d/1QDeeUcDqXes69Y2RjU2aWgOpCVWo5OVsBX9MKmMqi_o/export?format=tsv&gid=750683809' > $@
+
+
+target/mixs6_core_for_ss.yaml: target/mixs6_core_for_ss.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $^
+
+
+target/mixs6_for_ss.yaml: target/mixs6_for_ss.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $^
+
+
+target/carvoc_annotations.tsv: /Users/MAM/Documents/gitrepos/schemasheets/schemasheets/conf/configschema.yaml
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $< \
+		--meta_elements annotation \
+		--tsv_output $@
+
+
+target/carvoc_enums.tsv: /Users/MAM/Documents/gitrepos/schemasheets/schemasheets/conf/configschema.yaml
+	$(RUN) python utils/l2s_supplement.py \
+		--schema_source $< \
+		--meta_elements enum_definition \
+		--tsv_output $@
+
+# todo PV annotations can be generated but not incorporated
+#  unless the columns are copied and pasted
+#  write a script for that?
+target/carvoc_roundtrip.yaml: target/carvoc_annotations.tsv target/carvoc_enums.tsv
+	$(RUN) sheets2linkml \
+		--output $@ $^
+
 

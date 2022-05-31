@@ -70,12 +70,12 @@ cowardly_skip = [
 @click.command()
 @click_log.simple_verbosity_option(logger)
 @click.option("--schema_source", required=True)
-@click.option("--meta_element", required=True)
+@click.option("--meta_elements", required=True, multiple=True)
 @click.option("--tsv_output", required=True)
-def cli(schema_source: str, meta_element: str, tsv_output: str):
+def cli(schema_source: str, meta_elements: str, tsv_output: str):
     """
     :param schema_source:
-    :param meta_element:
+    :param meta_elements:
     :param tsv_output:
     :return:
     """
@@ -86,22 +86,45 @@ def cli(schema_source: str, meta_element: str, tsv_output: str):
 
     schema_view = SchemaView(schema_source)
 
-    if meta_element == "annotation":
-        get_annotations(schema_view, meta_view, tsv_output)
-    elif meta_element == "enum_definition":
-        get_enums(schema_view, meta_view, tsv_output)
-    elif meta_element == "prefix":
-        get_prefixes(schema_view, meta_view, tsv_output)
-    elif meta_element == "schema_definition":
-        get_schema(schema_view, meta_view, tsv_output)
-    elif meta_element == "slot_definition":
-        get_slots(schema_view, meta_view, tsv_output)
-    elif meta_element == "subset_definition":
-        get_subsets(schema_view, meta_view, tsv_output)
-    elif meta_element == "type_definition":
-        get_types(schema_view, meta_view, tsv_output)
-    elif meta_element == "class_definition":
-        get_classes(schema_view, meta_view, tsv_output)
+    # todo write to named directory
+    for current_element in meta_elements:
+        if current_element == "annotation":
+            get_annotations(schema_view, meta_view, tsv_output)
+        elif current_element == "enum_definition":
+            get_enums(schema_view, meta_view, tsv_output)
+        elif current_element == "prefix":
+            get_prefixes(schema_view, meta_view, tsv_output)
+        elif current_element == "schema_definition":
+            get_schema(schema_view, meta_view, tsv_output)
+        elif current_element == "slot_definition":
+            get_slots(schema_view, meta_view, tsv_output)
+        elif current_element == "subset_definition":
+            get_subsets(schema_view, meta_view, tsv_output)
+        elif current_element == "type_definition":
+            get_types(schema_view, meta_view, tsv_output)
+        elif current_element == "class_definition":
+            get_classes(schema_view, meta_view, tsv_output)
+        elif current_element == "mixs_core":
+            get_mixs_core(schema_view, meta_view, tsv_output)
+        else:
+            logger.warning(f"Metaclass {current_element} not recognized")
+
+
+def get_mixs_core(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+    sis_dict, sis_names = gms.element_to_is_dict(meta_view, "slot_definition")
+    cowardly_names = [i for i in sis_names if i not in cowardly_skip]
+    schema_slots = schema_view.all_slots()
+    schema_slot_dicts = []
+    for k, v in schema_slots.items():
+        current_dict = {"slot": k}
+        for i in cowardly_names:
+            current_dict[i] = gms.flatten_some_lists(
+                possible_list=v[i], slot_def=sis_dict[i]
+            )
+        schema_slot_dicts.append(current_dict)
+    df = pd.DataFrame(schema_slot_dicts)
+    final_frame = add_gt_row(df)
+    final_frame.to_csv(tsv_output, sep="\t", index=False)
 
 
 def get_classes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
@@ -193,7 +216,7 @@ def get_subsets(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str)
         df = prioritize_columns(df, ["subset"])
         df = add_gt_row(df)
     else:
-        final_frame = pd.DataFrame([{"subset": "> subset"}])
+        df = pd.DataFrame([{"subset": "> subset"}])
     df.to_csv(tsv_output, sep="\t", index=False)
 
 
@@ -296,8 +319,8 @@ def get_enums(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
                     current_pv_row = {"enum": i, "permissible_value": current_pv_name}
                     for current_pv_slot_name in pv_slot_names:
                         if (
-                            current_pv_slot_name in all_pvs[current_pv_name]
-                            and current_pv_slot_name not in cowardly_skip
+                                current_pv_slot_name in all_pvs[current_pv_name]
+                                and current_pv_slot_name not in cowardly_skip
                         ):
                             # todo add handling for dicts and lists of objs
                             current_value = all_pvs[current_pv_name][
@@ -346,7 +369,12 @@ def prioritize_columns(df: pd.DataFrame, initial_columns) -> pd.DataFrame:
 def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
     # todo this creates a standalone table.
     #  Will schemasheets honor it in combination with other sheets that specify the same terms?
-    type_to_col = {"class_definition": "class", "slot_definition": "slot"}
+    type_to_col = {
+        "class_definition": "class",
+        "enum": "enum",
+        "permissible_value": "permissible_value",
+        "slot_definition": "slot",
+    }
     lod = []
     tag_set = set()
     all_type_list = []
@@ -383,13 +411,49 @@ def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: 
     # # logger.info(f"annotation tags {tag_set}")
     # # logger.info(df)
 
-    schema_sheets_lod = []
+    # todo there can be annotations on classes that arent' considered elements? like annotations?
+    schema_enums = schema_view.all_enums()
+    for ek, ev in schema_enums.items():
+        for pvk, current_element in ev.permissible_values.items():
+            for k, v in current_element.annotations.items():
+                current_dict = {
+                    "schema": schema_view.schema.name,
+                    "element": pvk,
+                    "element_type": "permissible_value",
+                    "enum": ek,
+                }
+                for j in annotation_slot_names:
+                    current_dict[j] = v[j]
+                    if j == "tag":
+                        tag_set.add(v[j])
+                lod.append(current_dict)
+
+    dod = {}
     for i in lod:
-        raw_type = i["element_type"]
-        col_name = type_to_col[raw_type]
-        current_row = {col_name: i["element"], i["tag"]: i["value"]}
-        schema_sheets_lod.append(current_row)
-    schema_sheets_df = pd.DataFrame(schema_sheets_lod)
+        if i["element"] in dod:
+            dod[i["element"]][i["tag"]] = i["value"]
+        else:
+            if "enum" in i:
+                dod[i["element"]] = {
+                    i["element_type"]: i["element"],
+                    "enum": i["enum"],
+                    i["tag"]: i["value"],
+                }
+            else:
+                dod[i["element"]] = {
+                    i["element_type"]: i["element"],
+                    i["tag"]: i["value"],
+                }
+
+    schema_sheets_df = pd.DataFrame((dod.values()))
+
+    # schema_sheets_lod = []
+    # for i in lod:
+    #     raw_type = i["element_type"]
+    #     col_name = type_to_col[raw_type]
+    #     current_row = {col_name: i["element"], i["tag"]: i["value"]}
+    #     schema_sheets_lod.append(current_row)
+    # schema_sheets_df = pd.DataFrame(schema_sheets_lod)
 
     if len(schema_sheets_df.columns) > 0:
         initial_cols = set(schema_sheets_df.columns)
@@ -410,6 +474,7 @@ def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: 
         final_frame = pd.concat([headers_frame, schema_sheets_df])
     else:
         final_frame = pd.DataFrame([{"annotations": "> annotations"}])
+
     final_frame.to_csv(tsv_output, sep="\t", index=False)
 
 
