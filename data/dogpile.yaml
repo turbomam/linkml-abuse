@@ -1,0 +1,179 @@
+id: http://example.com/dogpile
+name: dogpile
+keywords:
+  - bone
+  - bein
+categories:
+  - https://en.wikipedia.org/wiki/Long_bone
+  - https://en.wikipedia.org/wiki/Sesamoid_bone
+settings:
+  bone_type: "[A-Za-z]+"
+  bone_number: "\\d+"
+# generation_date
+# source_file_size
+# source_file_date
+# source_file
+# metamodel_version
+version: 0.0.1
+imports:
+  - linkml:types
+license: CC0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  dogpile: http://example.com/dogpile/
+emit_prefixes:
+  - linkml
+  - dogpile
+default_curi_maps:
+  - semweb_context
+default_prefix: dogpile
+default_range: string
+subsets:
+  - canine
+  - feline
+types:
+  bone:
+    base: str
+    uri: dogpile:bone
+    repr: str
+    description: A bone string
+    # equals_string
+    # pattern
+    # equals_string_in
+    # equals_number
+    # minimum_value
+    # maximum_value
+    structured_pattern:
+      syntax: "{bone_type} {bone_number}"
+      interpolated: true
+      partial_match: true
+      description: a pattern for identifying bones
+      examples:
+        - value: rib 3
+          description: the third rib
+      in_language: English
+  tooth:
+    typeof: bone
+enums:
+  color_enum: { }
+classes:
+  dog:
+    slots:
+      - pet_name
+      - weight
+    slot_usage: { }
+    attributes: { }
+    class_uri: dogpile:dog
+    subclass_of:
+    #    union_of: { }
+    #    defining_slots: { }
+    tree_root:
+    unique_keys: { }
+    rules: { }
+    classification_rules: { }
+    slot_names_unique:
+    represents_relationship:
+    #    disjoint_with: { }
+    children_are_mutually_disjoint:
+    is_a:
+    mixins:
+    apply_to:
+    id_prefixes:
+      - dog
+      - hund
+    definition_uri: dogpile:dog
+    local_names:
+      littleendian: dog
+      bigendian: god
+    conforms_to: PetBase
+    abstract: false
+    mixin: false
+    values_from:
+    created_by:
+    created_on:
+    last_updated_on:
+    modified_by:
+    status:
+    string_serialization:
+    none_of:
+    exactly_one_of:
+    any_of:
+    all_of:
+    slot_conditions:
+    in_subset:
+      - canine
+    extensions: { }
+    annotations: { }
+    description: a canine animal
+    alt_descriptions: { }
+    title: Nice doggie
+    # deprecated
+    # deprecated element has exact replacement
+    # deprecated element has possible replacement
+    todos:
+      - win lottery
+      - get beatified
+    notes:
+      - it is always darkest just before the dawn
+      - there are plenty of fish in the sea
+    comments:
+      - that is a nice shirt
+      - be nice to your mother
+    # from_schema
+    # imported_from
+    # source
+    aliases:
+      - dog
+      - hund
+    structured_aliases: { }
+    mappings:
+      - http://purl.obolibrary.org/obo/NCIT_C14201
+      - http://purl.obolibrary.org/obo/NCBITaxon_9615
+    # several other mapping subtypes
+    see_also: https://en.wikipedia.org/wiki/Dog
+  cat: { }
+slots:
+  pet_name: { }
+  weight: { }
+  color:
+    range: color_enum
+    singular_name:
+    domain:
+    slot_uri: dogpile:color
+    multivalued: false
+    inherited:
+    readonly:
+    # ifabsent
+    list_elements_ordered:
+    shared:
+    key:
+    identifier:
+    designates_type:
+    alias: farbe
+    owner:
+    domain_of:
+    subproperty_of:
+    symmetric:
+    reflexive:
+    locally_reflexive:
+    irreflexive:
+    asymmetric:
+    transitive:
+    inverse:
+    is_class_field:
+    transitive_form_of:
+    reflexive_transitive_form_of:
+    role:
+    is_usage_slot:
+    usage_slot_name:
+    relational_role:
+    slot_group:
+    is_grouping_slot:
+    path_rule:
+    disjoint_with:
+    children_are_mutually_disjoint:
+    is_a:
+    mixins:
+    apply_to:
+
+

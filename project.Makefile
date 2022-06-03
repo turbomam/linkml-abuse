@@ -244,15 +244,14 @@ target/nmdc_schema_def.yaml: target/nmdc_schema_def.tsv
 #wastewater/sludge	40
 #water	85
 
-# /Users/MAM/Documents/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
-# /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
-# /Users/MAM/Documents/gitrepos/nmdc-schema/src/schema/nmdc.yaml
-# /Users/MAM/Documents/gitrepos/nmdc-schema/src/schema/nmdc.yaml
-# /Users/MAM/Documents/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml
 # /home/mark/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
 # /home/mark/gitrepos/mixs/model/schema/mixs.yaml
 # /home/mark/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml
-roundtrip_input = /Users/MAM/Documents/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
+# /Users/MAM/Documents/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
+# /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
+# /Users/MAM/Documents/gitrepos/nmdc-schema/src/schema/nmdc.yaml
+# /Users/MAM/Documents/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml
+roundtrip_input = /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
 
 target/roundtrip_annotations.tsv:
 	$(RUN) python utils/l2s_supplement.py \
@@ -342,7 +341,7 @@ target/mixs6.tsv:
 	curl -L -s 'https://docs.google.com/spreadsheets/d/1QDeeUcDqXes69Y2RjU2aWgOpCVWo5OVsBX9MKmMqi_o/export?format=tsv&gid=750683809' > $@
 
 
-target/mixs6_core_for_ss.yaml: target/mixs6_core_for_ss.tsv
+target/mixs6_core_for_ss.yaml: data/mixs6_core_for_ss.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $^
 
@@ -373,3 +372,7 @@ target/carvoc_roundtrip.yaml: target/carvoc_annotations.tsv target/carvoc_enums.
 		--output $@ $^
 
 
+poetry run python utils/l2s_supplement.py \
+		--schema_source /Users/MAM/Documents/gitrepos/nmdc-schema/src/schema/nmdc.yaml \
+		--meta_elements class_definition \
+		--tsv_output nmdc_classes.tsv
