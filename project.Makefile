@@ -251,7 +251,7 @@ target/nmdc_schema_def.yaml: target/nmdc_schema_def.tsv
 # /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
 # /Users/MAM/Documents/gitrepos/nmdc-schema/src/schema/nmdc.yaml
 # /Users/MAM/Documents/gitrepos/sheets_and_friends/artifacts/nmdc_dh.yaml
-roundtrip_input = /Users/MAM/Documents/gitrepos/mixs/model/schema/mixs.yaml
+roundtrip_input = /Users/MAM/Documents/gitrepos/linkml-model/linkml_model/model/schema/meta.yaml
 
 target/roundtrip_annotations.tsv:
 	$(RUN) python utils/l2s_supplement.py \
@@ -370,9 +370,3 @@ target/carvoc_enums.tsv: /Users/MAM/Documents/gitrepos/schemasheets/schemasheets
 target/carvoc_roundtrip.yaml: target/carvoc_annotations.tsv target/carvoc_enums.tsv
 	$(RUN) sheets2linkml \
 		--output $@ $^
-
-
-poetry run python utils/l2s_supplement.py \
-		--schema_source /Users/MAM/Documents/gitrepos/nmdc-schema/src/schema/nmdc.yaml \
-		--meta_elements class_definition \
-		--tsv_output nmdc_classes.tsv
