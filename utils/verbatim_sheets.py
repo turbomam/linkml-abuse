@@ -1,16 +1,17 @@
-import pprint
-
-from linkml_runtime import SchemaView
-import pandas as pd
-
+import errno
 import logging
+import os
+from typing import Dict, Any
 
 import click
 import click_log
-from linkml_runtime.dumpers import yaml_dumper
-from linkml_runtime.linkml_model import TypeDefinition
+import pandas as pd
+from linkml_runtime import SchemaView
 
 import get_metaclass_slotvals as gms
+
+# from linkml_runtime.dumpers import yaml_dumper
+# from linkml_runtime.linkml_model import TypeDefinition
 
 logger = logging.getLogger(__name__)
 click_log.basic_config(logger)
@@ -19,120 +20,202 @@ pd.set_option("display.max_columns", None)
 
 # todo deep roundtrip diff
 #  remember there are cowardly skips
-#  And know elements that don't propagate over imports like subsets and prefixes
+#  And known elements that don't propagate over imports like subsets and prefixes
 
-cowardly_skip = [
+# todo leaving some read onlies in     "from_schema",
+globally_skipped_attributes = [
     "all_members",
     "all_of",
     "alt_descriptions",
     "annotations",
     "any_of",
+    "apply_to",
     "attributes",
     "classes",
     "classification_rules",
     "default_curi_maps",
-    "definition_uri",
-    "domain_of",
     "enum_range",
     "enums",
     "exactly_one_of",
     "extensions",
-    "from_schema",
-    "generation_date",
     "implicit_prefix",
-    "imported_from",
     "imports",
-    "is_usage_slot",
     "local_names",
-    "metamodel_version",
     "name",
     "none_of",
-    "owner",
     "prefixes",
     "range_expression",
     "rules",
     "slot_definitions",
     "slot_usage",
     "slots",
-    "source_file",
-    "source_file_date",
-    "source_file_size",
     "structured_aliases",
     "subsets",
     "type_uri",
+    "union_of",
     "unique_keys",
+    "unit",
     "usage_slot_name",
+    # "created_by",
+    # "created_on",
+    # "definition_uri",
+    # "domain_of",
+    # "generation_date",
+    # "imported_from",
+    # "is_usage_slot",
+    # "last_updated_on",
+    # "metamodel_version",
+    # "owner",
+    # "source_file",
+    # "source_file_date",
+    # "source_file_size",
 ]
 
+pv_skipped_attributes = [
+    "abstract",
+    "apply_to",
+    "created_by",
+    "created_on",
+    "is_a",
+    "last_updated_on",
+    "mixin",
+    "mixins",
+    "modified_by",
+    "status",
+    "string_serialization",
+    "values_from",
+]
 
-# todo add click help and better docstrings
-#  turn the requests params into click options (with defaults)
+# todo what's so special about these attributes?
+# name gets printed in column slot
+# annotations go in another sheet
+slot_unspeakable_skips = [
+    "name",
+    "annotations",
+    "enum_range",
+    "implicit_prefix",
+    "union_of",
+    "unit",
+]
+
+meta_source = "https://w3id.org/linkml/meta.yaml"
+
+
+# todo add better docstrings
 @click.command()
 @click_log.simple_verbosity_option(logger)
-@click.option("--schema_source", required=True)
-@click.option("--meta_elements", required=True, multiple=True)
-@click.option("--tsv_output", required=True)
-def cli(schema_source: str, meta_elements: str, tsv_output: str):
+@click.option(
+    "--schema_source", required=True, help="Filesystem or http path to a LinkML schema"
+)
+@click.option(
+    "--meta_elements",
+    # required=True,
+    multiple=True,
+    help="Meta elements to include in the output. Can be specified multiple times. Default is all.",
+    type=click.Choice(
+        [
+            "annotation",
+            "class_definition",
+            "enum_definition",
+            "prefix",
+            "schema_definition",
+            "slot_definition",
+            "subset_definition",
+            "type_definition",
+        ]
+    ),
+)
+@click.option(
+    "--directory",
+    required=True,
+    help="Destination directory for per-element TSVs",
+    default="verbatim_sheets",
+)
+@click.option("--drop_empty_cols", default=True, help="Drop empty columns")
+def cli(schema_source: str, meta_elements: str, directory: str, drop_empty_cols: bool):
     """
+    Converts LinkML to one or more TSV files,
+    which can then be converted back to LinkML with schema_sheets.
+    Propagation of subsets and types may not be working over imports.
+
     :param schema_source:
     :param meta_elements:
-    :param tsv_output:
+    :param directory:
+    :param drop_empty_cols:
     :return:
     """
-
-    meta_source = "https://w3id.org/linkml/meta.yaml"
 
     meta_view = SchemaView(meta_source)
 
     schema_view = SchemaView(schema_source)
 
-    # todo write to named directory
+    if len(meta_elements) == 0:
+        meta_elements = [
+            "annotation",
+            "class_definition",
+            "enum_definition",
+            "prefix",
+            "schema_definition",
+            "slot_definition",
+            "subset_definition",
+            "type_definition",
+        ]
+
+    try:
+        os.makedirs(directory)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
     for current_element in meta_elements:
+        logger.info(current_element)
         if current_element == "annotation":
-            get_annotations(schema_view, meta_view, tsv_output)
+            get_annotations(schema_view, meta_view, directory)
         elif current_element == "enum_definition":
-            get_enums(schema_view, meta_view, tsv_output)
+            get_enums(schema_view, meta_view, directory)
         elif current_element == "prefix":
-            get_prefixes(schema_view, meta_view, tsv_output)
+            get_prefixes(schema_view, meta_view, directory)
         elif current_element == "schema_definition":
-            get_schema(schema_view, meta_view, tsv_output)
+            get_schema(schema_view, meta_view, directory)
         elif current_element == "slot_definition":
-            get_slots(schema_view, meta_view, tsv_output)
+            final_frame = get_slots(schema_view, meta_view, drop_empty_cols)
+            tsv_file = os.path.join(directory, "slots.tsv")
+            final_frame.to_csv(tsv_file, sep="\t", index=False)
         elif current_element == "subset_definition":
-            get_subsets(schema_view, meta_view, tsv_output)
+            get_subsets(schema_view, meta_view, directory)
         elif current_element == "type_definition":
-            get_types(schema_view, meta_view, tsv_output)
+            get_types(schema_view, meta_view, directory)
         elif current_element == "class_definition":
-            get_classes(schema_view, meta_view, tsv_output)
-        elif current_element == "mixs_core":
-            get_mixs_core(schema_view, meta_view, tsv_output)
+            get_classes(schema_view, meta_view, directory)
+        # elif current_element == "mixs_core":
+        #     get_mixs_core(schema_view, meta_view, directory)
         else:
             logger.warning(f"Metaclass {current_element} not recognized")
 
 
-def get_mixs_core(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
-    sis_dict, sis_names = gms.element_to_is_dict(meta_view, "slot_definition")
-    cowardly_names = [i for i in sis_names if i not in cowardly_skip]
-    schema_slots = schema_view.all_slots()
-    schema_slot_dicts = []
-    for k, v in schema_slots.items():
-        current_dict = {"slot": k}
-        for i in cowardly_names:
-            current_dict[i] = gms.flatten_some_lists(
-                possible_list=v[i], slot_def=sis_dict[i]
-            )
-        schema_slot_dicts.append(current_dict)
-    df = pd.DataFrame(schema_slot_dicts)
-    final_frame = add_gt_row(df)
-    final_frame.to_csv(tsv_output, sep="\t", index=False)
+# def get_mixs_core(schema_view: SchemaView, meta_view: SchemaView, directory: str):
+#     sis_dict, sis_names = gms.element_to_is_dict(meta_view, "slot_definition")
+#     cowardly_names = [i for i in sis_names if i not in globally_skipped_attributes]
+#     schema_slots = schema_view.all_slots()
+#     schema_slot_dicts = []
+#     for k, v in schema_slots.items():
+#         current_dict = {"slot": k}
+#         for i in cowardly_names:
+#             current_dict[i] = gms.flatten_some_lists(
+#                 possible_list=v[i], slot_def=sis_dict[i]
+#             )
+#         schema_slot_dicts.append(current_dict)
+#     df = pd.DataFrame(schema_slot_dicts)
+#     final_frame = add_gt_row(df)
+#     final_frame.to_csv(directory, sep="\t", index=False)
 
 
-def get_classes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+def get_classes(schema_view: SchemaView, meta_view: SchemaView, directory: str):
     schema_classes = schema_view.all_classes()
     cis_dict, cis_names = gms.element_to_is_dict(meta_view, "class_definition")
     sis_dict, sis_names = gms.element_to_is_dict(meta_view, "slot_definition")
-    cowardly_class_names = [i for i in cis_dict if i not in cowardly_skip]
-    cowardly_slot_names = [i for i in sis_dict if i not in cowardly_skip]
+    cowardly_class_names = [i for i in cis_dict if i not in globally_skipped_attributes]
+    cowardly_slot_names = [i for i in sis_dict if i not in globally_skipped_attributes]
     class_lod = []
     usage_lod = []
     for ck, cv in schema_classes.items():
@@ -166,10 +249,11 @@ def get_classes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str)
     combo_df = pd.concat([class_df, slot_df])
     final_frame = prioritize_columns(combo_df, ["class", "slot"])
     final_frame = add_gt_row(final_frame)
-    final_frame.to_csv(tsv_output, sep="\t", index=False)
+    tsv_file = os.path.join(directory, "classes.tsv")
+    final_frame.to_csv(tsv_file, sep="\t", index=False)
 
 
-def get_schema(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+def get_schema(schema_view: SchemaView, meta_view: SchemaView, directory: str):
     # must omit:
     # "default_curi_maps" (0..* String)
     #   ERROR:root:Cannot fetch: https://raw.githubusercontent.com/prefixcommons/biocontext/master/registry/obo_context|idot_context.jsonld
@@ -179,20 +263,20 @@ def get_schema(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
     #   TypeError: unsupported operand type(s) for +: 'dict' and 'list'
     schema_schema = schema_view.schema
     sis_dict, sis_names = gms.element_to_is_dict(meta_view, "schema_definition")
-    cowardly_names = [i for i in sis_dict if i not in cowardly_skip]
+    cowardly_names = [i for i in sis_dict if i not in globally_skipped_attributes]
     current_dict = {"schema": schema_schema.name}
     for i in cowardly_names:
-        # print(f"{sis_dict[i].multivalued} {sis_dict[i].range} {i}")
         current_dict[i] = gms.flatten_some_lists(
             possible_list=schema_schema[i], slot_def=sis_dict[i]
         )
     df = pd.DataFrame(current_dict, index=[0])
     df = prioritize_columns(df, ["schema"])
     df = add_gt_row(df)
-    df.to_csv(tsv_output, sep="\t", index=False)
+    tsv_file = os.path.join(directory, "schema.tsv")
+    df.to_csv(tsv_file, sep="\t", index=False)
 
 
-def get_subsets(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+def get_subsets(schema_view: SchemaView, meta_view: SchemaView, directory: str):
     # todo subsets aren't getting merged
     #   other files with subsets:
     #   core.yaml: subsets:
@@ -202,7 +286,7 @@ def get_subsets(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str)
     schema_view.merge_imports()
     schema_subsets = schema_view.all_subsets(imports=True)
     sis_dict, sis_names = gms.element_to_is_dict(meta_view, "subset_definition")
-    cowardly_names = [i for i in sis_dict if i not in cowardly_skip]
+    cowardly_names = [i for i in sis_dict if i not in globally_skipped_attributes]
     lod = []
     for k, v in schema_subsets.items():
         current_dict = {"subset": k}
@@ -217,10 +301,11 @@ def get_subsets(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str)
         df = add_gt_row(df)
     else:
         df = pd.DataFrame([{"subset": "> subset"}])
-    df.to_csv(tsv_output, sep="\t", index=False)
+    tsv_file = os.path.join(directory, "subsets.tsv")
+    df.to_csv(tsv_file, sep="\t", index=False)
 
 
-def get_prefixes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+def get_prefixes(schema_view: SchemaView, meta_view: SchemaView, directory: str):
     # todo are prefixes getting merged from imports?
     schema_view.merge_imports()
     schema_prefixes = schema_view.schema.prefixes
@@ -230,38 +315,53 @@ def get_prefixes(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str
     df = pd.DataFrame(lod)
     df = add_gt_row(df)
     df = prioritize_columns(df, ["prefix"])
-    df.to_csv(tsv_output, sep="\t", index=False)
+    tsv_file = os.path.join(directory, "prefixes.tsv")
+    df.to_csv(tsv_file, sep="\t", index=False)
 
 
-def get_slots(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+def get_slots(schema_view: SchemaView, meta_view: SchemaView, drop_empty_cols):
     sis_dict, sis_names = gms.element_to_is_dict(meta_view, "slot_definition")
-    cowardly_names = [i for i in sis_names if i not in cowardly_skip]
+    sis_names.sort()
+    # cowardly_names = [i for i in sis_names if i not in globally_skipped_attributes]
     schema_slots = schema_view.all_slots()
     schema_slot_dicts = []
     for k, v in schema_slots.items():
         current_dict = {"slot": k}
-        for i in cowardly_names:
-            current_dict[i] = gms.flatten_some_lists(
-                possible_list=v[i], slot_def=sis_dict[i]
-            )
+        for i in sis_names:
+            if i in globally_skipped_attributes:
+                if i not in slot_unspeakable_skips:
+                    if v[i]:
+                        logger.warning(f"{k} {i} {v[i]}")
+                        current_dict[i] = "asserted"
+                    else:
+                        current_dict[i] = None
+                # else:
+                #     logger.warning(f"{k} {i} has un unspeakable value")
+            else:
+                if v[i]:
+                    current_dict[i] = gms.flatten_some_lists(
+                        possible_list=v[i], slot_def=sis_dict[i]
+                    )
         # # why not type_uri?
         # current_dict["uri"] = v.uri
         schema_slot_dicts.append(current_dict)
     df = pd.DataFrame(schema_slot_dicts)
-    # final_frame = prioritize_columns(df, ["type", "uri"])
+    df.sort_values(by=["slot"], inplace=True)
+    if drop_empty_cols:
+        df.dropna(how="all", axis=1, inplace=True)
     final_frame = add_gt_row(df)
-    final_frame.to_csv(tsv_output, sep="\t", index=False)
+    return final_frame
 
 
-def get_types(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+def get_types(schema_view: SchemaView, meta_view: SchemaView, directory: str):
     tis_dict, tis_names = gms.element_to_is_dict(meta_view, "type_definition")
-    cowardly_names = [i for i in tis_names if i not in cowardly_skip]
+    cowardly_names = [i for i in tis_names if i not in globally_skipped_attributes]
     schema_types = schema_view.all_types(imports=True)
     schema_type_dicts = []
     for k, v in schema_types.items():
         # try this!
         # for i in v.__iter__():
-        #     print(i)
+        #     logger.warning(i)
         if str(v.from_schema) != "https://w3id.org/linkml/types":
             current_dict = {"type": k}
             for i in cowardly_names:
@@ -275,22 +375,34 @@ def get_types(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
     if len(df.columns) > 0:
         final_frame = prioritize_columns(df, ["type", "uri"])
         final_frame = add_gt_row(final_frame)
-        # final_frame = final_frame.replace(dict(), None, regex=False)
     else:
         final_frame = pd.DataFrame([{"type": "> type"}])
-    final_frame.to_csv(tsv_output, sep="\t", index=False)
+    tsv_file = os.path.join(directory, "types.tsv")
+    final_frame.to_csv(tsv_file, sep="\t", index=False)
 
 
 def add_gt_row(df: pd.DataFrame) -> pd.DataFrame:
+    # store the list of column names
     r1 = list(df.columns)
+    # todo alphabetize columns
+    # todo keep the first column first
+    first_col = r1[0]
+    del r1[0]
+    r1.sort()
+    r1 = [first_col] + r1
+    df = df[r1]
+    # prepend the first column name with
     r1[0] = f"> {r1[0]}"
+    # make a row dict
     extra_row_dict = dict(zip(df.columns, r1))
+    # make a row frame
     extra_row = pd.DataFrame(extra_row_dict, index=[0])
+    # concatenate the two frames
     final_frame = pd.concat([extra_row, df]).reset_index(drop=True)
     return final_frame
 
 
-def get_enums(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+def get_enums(schema_view: SchemaView, meta_view: SchemaView, directory: str):
     initial_columns = ["enum", "permissible_value"]
     sis_dict, sis_names = gms.element_to_is_dict(meta_view, "enum_definition")
     pv_is_dict, pv_is_names = gms.element_to_is_dict(meta_view, "permissible_value")
@@ -319,8 +431,8 @@ def get_enums(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
                     current_pv_row = {"enum": i, "permissible_value": current_pv_name}
                     for current_pv_slot_name in pv_slot_names:
                         if (
-                                current_pv_slot_name in all_pvs[current_pv_name]
-                                and current_pv_slot_name not in cowardly_skip
+                            current_pv_slot_name in all_pvs[current_pv_name]
+                            and current_pv_slot_name not in globally_skipped_attributes
                         ):
                             # todo add handling for dicts and lists of objs
                             current_value = all_pvs[current_pv_name][
@@ -333,7 +445,10 @@ def get_enums(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
                             current_pv_row[current_pv_slot_name] = final
                     pv_lod.append(current_pv_row)
             else:
-                if j not in cowardly_skip:
+                if (
+                    j not in globally_skipped_attributes
+                    and j not in pv_skipped_attributes
+                ):
                     final = gms.flatten_some_lists(
                         possible_list=schema_enum_dict[i][j],
                         slot_def=sis_dict[j],
@@ -348,11 +463,12 @@ def get_enums(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
 
     # # this doesn't work for removing empty dict serializations
     # temp = final_frame.replace("{}", "", regex=False)
-    # print(temp)
+    # logger.warning(temp)
 
     final_frame = add_gt_row(final_frame)
 
-    final_frame.to_csv(tsv_output, sep="\t", index=False)
+    tsv_file = os.path.join(directory, "enums.tsv")
+    final_frame.to_csv(tsv_file, sep="\t", index=False)
 
 
 def prioritize_columns(df: pd.DataFrame, initial_columns) -> pd.DataFrame:
@@ -366,7 +482,7 @@ def prioritize_columns(df: pd.DataFrame, initial_columns) -> pd.DataFrame:
     return df
 
 
-def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: str):
+def get_annotations(schema_view: SchemaView, meta_view: SchemaView, directory: str):
     # todo this creates a standalone table.
     #  Will schemasheets honor it in combination with other sheets that specify the same terms?
     type_to_col = {
@@ -404,13 +520,6 @@ def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: 
                             tag_set.add(v[j])
                     lod.append(current_dict)
 
-    # df = pd.DataFrame(lod)
-    # # todo reshape to match schemasheets' input expectations
-    # # logger.info(pd.Series(all_type_list).value_counts())
-    # # logger.info(pd.Series(annotated_type_list).value_counts())
-    # # logger.info(f"annotation tags {tag_set}")
-    # # logger.info(df)
-
     # todo there can be annotations on classes that arent' considered elements? like annotations?
     schema_enums = schema_view.all_enums()
     for ek, ev in schema_enums.items():
@@ -428,7 +537,7 @@ def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: 
                         tag_set.add(v[j])
                 lod.append(current_dict)
 
-    dod = {}
+    dod: Dict[str, Any] = {}
     for i in lod:
         if i["element"] in dod:
             dod[i["element"]][i["tag"]] = i["value"]
@@ -446,14 +555,6 @@ def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: 
                 }
 
     schema_sheets_df = pd.DataFrame(dod.values())
-
-    # schema_sheets_lod = []
-    # for i in lod:
-    #     raw_type = i["element_type"]
-    #     col_name = type_to_col[raw_type]
-    #     current_row = {col_name: i["element"], i["tag"]: i["value"]}
-    #     schema_sheets_lod.append(current_row)
-    # schema_sheets_df = pd.DataFrame(schema_sheets_lod)
 
     if len(schema_sheets_df.columns) > 0:
         initial_cols = set(schema_sheets_df.columns)
@@ -475,7 +576,8 @@ def get_annotations(schema_view: SchemaView, meta_view: SchemaView, tsv_output: 
     else:
         final_frame = pd.DataFrame([{"annotations": "> annotations"}])
 
-    final_frame.to_csv(tsv_output, sep="\t", index=False)
+    tsv_file = os.path.join(directory, "annotations.tsv")
+    final_frame.to_csv(tsv_file, sep="\t", index=False)
 
 
 if __name__ == "__main__":

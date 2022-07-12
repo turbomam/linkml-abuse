@@ -1,5 +1,5 @@
 # Auto generated from linkml_abuse.yaml by pythongen.py version: 0.9.0
-# Generation date: 2022-05-23T08:31:45
+# Generation date: 2022-07-08T22:42:53
 # Schema: my_datamodel
 #
 # id: https://w3id.org/my_org/my_datamodel

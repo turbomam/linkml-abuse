@@ -1,15 +1,15 @@
 # import prefixcommons as pc
-from linkml_runtime import SchemaView
-import pandas as pd
-
+import errno
 import logging
+import os
+from typing import Dict
 
 import click
 import click_log
+import pandas as pd
+from linkml_runtime import SchemaView
 
 # todo how to remember the yaml_dumper import
-from linkml_runtime.dumpers import yaml_dumper
-from linkml_runtime.linkml_model import Example
 
 logger = logging.getLogger(__name__)
 click_log.basic_config(logger)
@@ -17,18 +17,27 @@ click_log.basic_config(logger)
 pd.set_option("display.max_columns", None)
 
 
-# todo add click help and better docstrings
-#  turn the requests params into click options (with defaults)
 @click.command()
 @click_log.simple_verbosity_option(logger)
 @click.option("--selected_element", required=True)
-def cli(selected_element: str):
+@click.option(
+    "--directory",
+    required=True,
+    help="Destination directory element reports",
+    default="element_reports",
+)
+def cli(selected_element: str, directory: str):
     """
     :param selected_element:
+    :param directory:
     :return:
     """
 
-    # todo add indicator of whether the range for each row is a class or a type
+    try:
+        os.makedirs(directory)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
     memorable = "linkml:meta.yaml"
     # todo how to remember what case to use?
@@ -42,30 +51,40 @@ def cli(selected_element: str):
 
     meta_view = SchemaView(expanded)
 
-    # todo: how to immediately parse the two items out (from a tuple?)
     sis_dict, sis_names = element_to_is_dict(meta_view, "slot_definition")
     eis_dict, eis_names = element_to_is_dict(meta_view, selected_element)
 
     lod = []
     type_dict = {}
-    type_tally = {}
+    type_tally: Dict[str, int] = {}
     for en in eis_names:
         ev = eis_dict[en]
         current_dict = {first_col: en}
         for sn in sis_names:
             if sn in ev:
                 if ev[sn]:
-                    if sn in type_dict:
-                        type_tally[sn] = type_tally[sn] + 1
+                    verbatim_range = sis_dict[sn].range
+
+                    # if sn in type_dict:
+                    #     type_tally[sn] = type_tally[sn] + 1
+                    # else:
+                    #     type_dict[sn] = sis_dict[sn].range
+                    #     type_tally[sn] = 1
+
+                    if sn not in type_dict:
+                        type_dict[sn] = verbatim_range
+
+                    if verbatim_range in type_tally:
+                        type_tally[verbatim_range] = type_tally[verbatim_range] + 1
                     else:
-                        type_dict[sn] = sis_dict[sn].range
-                        type_tally[sn] = 1
+                        type_tally[verbatim_range] = 1
+
                     final = ""
                     # todo might want special handling for examples
                     # somehow the X_definitions have their names cast to strings
                     # todo: sis_dict doesn't consider the fact
                     #  that a slot might have different usage in some meta classes?
-                    if sis_dict[sn].multivalued and sis_dict[sn].range in [
+                    if sis_dict[sn].multivalued and verbatim_range in [
                         "string",
                         "class_definition",
                         "slot_definition",
@@ -91,16 +110,21 @@ def cli(selected_element: str):
     col_names = [first_col] + col_names
     df = df[col_names]
 
-    type_frame = pd.DataFrame(list(type_dict.items()), columns=["slot", "range"])
-    tally_frame = pd.DataFrame(list(type_tally.items()), columns=["slot", "count"])
+    tally_frame = pd.DataFrame(list(type_tally.items()), columns=["range", "count"])
+    tally_frame.sort_values(
+        by=["count", "range"], ascending=[False, True], inplace=True
+    )
+    tsv_file = os.path.join(directory, f"{selected_element}_range_tally.tsv")
+    tally_frame.to_csv(tsv_file, sep="\t", index=False)
 
-    df.to_csv(f"target/{selected_element}_slotvals.tsv", sep="\t", index=False)
-    type_frame.to_csv(
-        f"target/{selected_element}_slotranges.tsv", sep="\t", index=False
-    )
-    tally_frame.to_csv(
-        f"target/{selected_element}_range_tally.tsv", sep="\t", index=False
-    )
+    type_frame = pd.DataFrame(list(type_dict.items()), columns=["slot", "range"])
+    type_frame.sort_values(by="slot", ascending=True, inplace=True)
+    tsv_file = os.path.join(directory, f"{selected_element}_slot_ranges.tsv")
+    type_frame.to_csv(tsv_file, sep="\t", index=False)
+
+    tsv_file = os.path.join(directory, f"{selected_element}_slot_vals.tsv")
+    # df.sort_values(by="count", ascending=False, inplace=True)
+    df.to_csv(tsv_file, sep="\t", index=False)
 
     # todo attempt to get URL for meta.yaml from "linkml:meta.yaml" alone
     # Slot: default_curi_maps

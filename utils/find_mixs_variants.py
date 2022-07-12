@@ -14,15 +14,15 @@ print(mixs_frame.shape)
 stragglers = mixs_frame.loc[~mixs_frame.iloc[:, 13].isna()].copy()
 canonical = mixs_frame.loc[mixs_frame.iloc[:, 13].isna()].copy()
 
-stragglers["MIXS ID"] = stragglers["github ticket"]
-stragglers["github ticket"] = stragglers["Unnamed: 13"]
+# stragglers["MIXS ID"] = stragglers["github ticket"]
+# stragglers["github ticket"] = stragglers["Unnamed: 13"]
 
 reconstituted = pd.concat([canonical, stragglers])
 # drop 14th column
 # after nudging
 reconstituted = reconstituted.iloc[
-                :, [j for j, c in enumerate(reconstituted.columns) if j != 13]
-                ]
+    :, [j for j, c in enumerate(reconstituted.columns) if j != 13]
+]
 
 print(reconstituted["Environmental package"].value_counts(dropna=False))
 # this includes Environmental package * slot usage, sometimes with variants
@@ -47,16 +47,16 @@ print(pd.Series(abstractions).value_counts(dropna=False))
 # ---
 
 anonymous = reconstituted.iloc[
-            :, [j for j, c in enumerate(reconstituted.columns) if j != 0]
-            ].copy()
+    :, [j for j, c in enumerate(reconstituted.columns) if j != 0]
+].copy()
 
 anonymous.drop_duplicates(inplace=True)
 
 id_counts = (
     anonymous["MIXS ID"]
-        .value_counts()
-        .rename_axis("MIXS ID")
-        .reset_index(name="variant_count")
+    .value_counts()
+    .rename_axis("MIXS ID")
+    .reset_index(name="variant_count")
 )
 
 anonymous = anonymous.merge(right=id_counts)
